@@ -66,6 +66,11 @@ enter your network. The screen then shows the 8-character device ID.
   RGB565 canvas (110 KB), allocated before Wi-Fi so it gets one contiguous block. `flip()` pushes
   it whole at 80 MHz in ~31-33 ms, inside the Lua dispatch (well under the 1 s deadline). There's
   no room for a second buffer to push from in the background.
+- **Lua is slow: the C6 has no FPU.** Floats, `math.sin`, `math.sqrt` and `^` are emulated. A
+  full-screen `lgfx` flame doing ~137,000 Lua instructions and 985 draw calls a tick took ~285 ms
+  (3.5 fps, `dt_ms` averaged over 30 ticks); with lookup tables, integer colour blends and fewer
+  calls (~50,000 instructions, 609 calls) it took ~104 ms (10 fps). Bench doesn't model this; the
+  device skill's *Speed on a real board* section tells app writers how to stay inside a tick.
 - **The RGB LED takes R, G, B** byte order, not a WS2812's G, R, B: `rgbLedWrite(8, r, g, b)` shows
   red as green. Stage 1 swaps them. No Lua module drives it.
 - **BOOT is GPIO9**, active low, with the board's own pull-up (a strapping pin). It's the only key.

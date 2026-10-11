@@ -82,10 +82,31 @@ enough memory" and the board stays online for the next one.
 
 Each dispatch (loading the app, `init`, a tick, an event) gets 1000 ms. Past that, a board raises
 `execution deadline exceeded (1000 ms)` and the app carries on. Bench counts the 1000 ms as about 4
-million Lua instructions, what an ESP32-S3 runs (other chips aren't measured; the C6, at 160 MHz,
-runs fewer). Nothing times an LVGL callback, a coroutine that never yields back, or a dispatch that
-catches the deadline error with `pcall` and carries on. On a board those hang it, so Bench halts the
-app.
+million Lua instructions, what an ESP32-S3 runs (the C6 runs far fewer: see below). Nothing times an
+LVGL callback, a coroutine that never yields back, or a dispatch that catches the deadline error
+with `pcall` and carries on. On a board those hang it, so Bench halts the app.
+
+## Speed on a real board
+
+Bench runs Lua 50 to 100 times faster than a board, so an animation that is smooth on Bench can
+crawl on the glass. `on_tick` comes every 100 ms; a tick that takes longer (its Lua plus the
+`flip()` that pushes the frame) delays the next one, and the frame rate drops with it.
+
+- **ESP32-C6: no FPU.** Every float operation is emulated, and `math.sin`, `math.sqrt` and `^` cost
+  the most. Measured on the C6-LCD-1.47 with a full-screen `lgfx` flame: about 137,000 Lua
+  instructions and 985 draw calls a tick took ~285 ms (3.5 fps); about 50,000 instructions and 609
+  calls took ~104 ms (10 fps). Pushing the 172×320 frame is ~32 ms of that.
+- **For 10 fps on the C6**, keep a full redraw to roughly 50,000 instructions and 600 draw calls:
+  - Build lookup tables in `init` (shapes, colour ramps) instead of calling `sin` or `^` for
+    every row; work out what varies per frame at a dozen points and blend between them.
+  - Blend colours with integers (`(a + (b - a) * k // 256)` per channel, `k` 0–256), not floats.
+  - Don't create closures or tables in a loop that runs each frame: they're garbage in a small heap.
+  - Fewer, bigger draw calls: merge rows of one colour into one `fillRect`, and step soft
+    things (glows, gradients) 4 rows at a time.
+- **Stiff springs at 10 Hz:** a spring that's stable at 30 fps can blow up at a 100 ms tick. Step
+  it in 10 ms slices inside `on_tick`.
+- **Measure on the board:** log the average `dt_ms` over 30 ticks (`log.info`) and read the
+  board's serial output. ~100 means the board keeps up; more means it's falling behind.
 
 ## On a real board (Bench's Mirror)
 
