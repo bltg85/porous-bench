@@ -24,6 +24,7 @@ local s = screens.get("main")   -- { name, w, h, shape, depth = 16 | 1, scheme =
 | Waveshare ESP32-C6-LCD-1.47 | 172×320 | 16 | dark | rounded corners: keep ~20 px clear |
 | Waveshare ESP32-S3-Touch-LCD-2 | 240×320 | 16 | dark | touch panel (`touchscreen`); IMU |
 | Waveshare ESP32-S3-Touch-AMOLED-1.32 | 466×466 | 16 | dark | round (`shape = "round"`): only the circle of radius 233 shows; AMOLED, black is off; touch panel (`touchscreen`) |
+| Seeed Studio Round Display for XIAO | 240×240 | 16 | dark | round (`shape = "round"`): only the circle of radius 120 shows; touch panel (`touchscreen`) |
 | Waveshare ESP32-S3-AMOLED-1.91 | 536×240 (landscape) | 16 | dark | AMOLED, black is off; IMU; the Touch version adds a touch panel (`touchscreen`) |
 | 1.3" ST7789 | 240×240 | 16 | dark | |
 | SSD1306 OLED | 128×64 or 128×32 | 1 | dark | colours threshold to lit/unlit at 50% brightness |
@@ -66,7 +67,7 @@ The board driving the output decides what an app gets. Bench shows it under the 
 
 | Board | Libraries | Memory for apps |
 |---|---|---|
-| M5StickC Plus2, M5StickS3, ESP32-S3 DevKitC-1 N16R8, Seeed Studio XIAO ESP32S3, Waveshare ESP32-S3-Touch-LCD-2, Waveshare ESP32-S3-Touch-AMOLED-1.32, Waveshare ESP32-S3-AMOLED-1.91 and its Touch version | `screen`, `lgfx`, `lvgl` | PSRAM (MBs) |
+| M5StickC Plus2, M5StickS3, ESP32-S3 DevKitC-1 N16R8, Seeed Studio XIAO ESP32S3 (on its own or behind the Round Display), Waveshare ESP32-S3-Touch-LCD-2, Waveshare ESP32-S3-Touch-AMOLED-1.32, Waveshare ESP32-S3-AMOLED-1.91 and its Touch version | `screen`, `lgfx`, `lvgl` | PSRAM (MBs) |
 | ESP32 without PSRAM (Waveshare ESP32 e-Paper Driver Board, ESP32 DevKitC) | `screen`, `lgfx`; no `lvgl` | ~52 KB |
 | Waveshare ESP32-C6-LCD-1.47 | `screen`, `lgfx`; no `lvgl` | ~84 KB |
 
@@ -202,6 +203,7 @@ everything after `#share=` (`1.` and the rest).
 | Waveshare ESP32-S3-Touch-AMOLED-1.32 | `waveshare-esp32-s3-touch-amoled-1.32` | `waveshare-esp32-s3-touch-amoled-1.32` |
 | Waveshare ESP32-S3-AMOLED-1.91 | `waveshare-esp32-s3-amoled-1.91` | `waveshare-esp32-s3-amoled-1.91` |
 | Waveshare ESP32-S3-Touch-AMOLED-1.91 | `waveshare-esp32-s3-touch-amoled-1.91` | `waveshare-esp32-s3-amoled-1.91` |
+| Seeed Studio Round Display for XIAO | `seeed-xiao-round-display` | `seeed-xiao-esp32s3-round-display` |
 | 1.3" ST7789 240×240 | `generic-st7789-240x240` | a dev board |
 | SSD1306 OLED 128×64 | `ssd1306-128x64` (yellow/blue: `ssd1306-128x64-yellow-blue`) | a dev board |
 | SSD1306 OLED 128×32 | `ssd1306-128x32` | a dev board |
@@ -314,9 +316,10 @@ press": the user can then connect any part to it.
 ### touchscreen (Bench driver, displays with a touch panel)
 
 Only on a display with a touch panel (the Waveshare ESP32-S3-Touch-LCD-2,
-ESP32-S3-Touch-AMOLED-1.32 and ESP32-S3-Touch-AMOLED-1.91); elsewhere
-`touchscreen` is nil, so check `if touchscreen then` or tag the app `-- @needs touch`. One finger,
-in the coordinates the app draws in. In Bench the user taps and drags on the screen with the mouse.
+ESP32-S3-Touch-AMOLED-1.32 and ESP32-S3-Touch-AMOLED-1.91, and the
+Seeed Studio Round Display for XIAO); elsewhere `touchscreen` is nil, so check
+`if touchscreen then` or tag the app `-- @needs touch`. One finger, in the coordinates the app
+draws in. In Bench the user taps and drags on the screen with the mouse.
 
 ```lua
 local t = touchscreen.read()   -- { pressed = bool, x, y }: the last point touched

@@ -279,6 +279,24 @@ export const PINOUTS: Record<string, Pinout> = {
     notes: ['The XIAO prints its pins as D0–D10: the diagram gives both names.', 'D6 and D7 are the chip\'s serial port, and it prints its boot log on D6 at reset: Bench uses them last.'],
     source: 'Seeed Studio XIAO ESP32S3 pinout and ESP32-S3 datasheet',
   },
+  'seeed-xiao-esp32s3-round-display': {
+    // The Round Display takes every pin: SPI on D8–D10, the LCD's CS and DC on D1 and D3, the SD
+    // card's CS on D2, touch INT on D7, and, through its KE switch, the backlight on D6 and the
+    // battery divider on D0. Its I2C bus on D4/D5 (touch, RTC) takes sensors and nothing else.
+    pins: pins([
+      { gpio: 5, adc: 4, touch: 5 },
+      { gpio: 6, adc: 5, touch: 6 },
+    ]),
+    i2c: { sda: 5, scl: 6, own: 'the touch panel and the RTC' },
+    keys: [{ gpio: 0, onBoard: "the XIAO's B (BOOT) key" }],
+    fiveVolt: '5V',
+    printed: (g) => `D${XIAO_D.indexOf(g)} (GPIO ${g})`,
+    notes: [
+      'The display takes every XIAO pin but the I2C bus (D4, D5), which an I2C sensor can share with the touch panel and the RTC; solder to the XIAO\'s pads, its pins are in the display\'s sockets.',
+      'Turn the KE switch\'s 1 off and D0 is free too, without the battery reading.',
+    ],
+    source: 'Seeed Studio Round Display for XIAO v1.1 schematic and the XIAO ESP32S3 pinout',
+  },
   'waveshare-esp32-epaper-driver': {
     // The DevKitC's header layout (J4, then J3), less the e-paper's 13–15 and 25–27, the BOOT key
     // on 0, the LED on 2, the key on 12 (to GND, a strap: measured on the board, see

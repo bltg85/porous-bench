@@ -243,7 +243,7 @@ export function buildModel(profile: DeviceProfile, screenCanvas: HTMLCanvasEleme
         const color = new THREE.Color(part.color ?? '#d6dbe6');
         const mesh = new THREE.Mesh(geo, track(new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.92 })));
         mesh.add(new THREE.LineSegments(track(new THREE.EdgesGeometry(geo, 30)), GHOST));
-        onFace(mesh, part.face, part.u, part.v, body, depth / 2 - 0.2);
+        onFace(mesh, part.face, part.u, part.v, body, depth / 2 - 0.2 + (part.z ?? 0));
         group.add(mesh);
         buttons.push({ mesh, input: part.input, label: part.label ?? 'button', color, rest: mesh.position.clone(), normal: faceNormal(part.face) });
         break;
@@ -280,6 +280,12 @@ export function buildModel(profile: DeviceProfile, screenCanvas: HTMLCanvasEleme
         group.add(ring);
         break;
       }
+      case 'block': {
+        const o = slab(part.w, part.h, part.d, part.r ?? 0.3, 0, (part.z ?? 0) > 0 ? GHOST : GHOST_DIM);
+        onFace(o, part.face, part.u, part.v, body, (part.z ?? 0) + part.d / 2);
+        group.add(o);
+        break;
+      }
       case 'led': {
         const geo = track(new THREE.CircleGeometry(part.r, 20));
         const led = new THREE.Mesh(geo, track(new THREE.MeshBasicMaterial({ color: part.color, transparent: true, opacity: 0.85 })));
@@ -290,7 +296,9 @@ export function buildModel(profile: DeviceProfile, screenCanvas: HTMLCanvasEleme
     }
   }
 
-  const radius = 0.5 * Math.hypot(body.w, body.h, body.d + (enc.module?.d ?? 0) * 2);
+  // As deep as the module in front or whatever stands furthest off a face (a board plugged in behind).
+  const reach = Math.max(enc.module?.d ?? 0, ...(enc.parts ?? []).map((p) => (p.kind === 'block' ? (p.z ?? 0) + p.d : 0)));
+  const radius = 0.5 * Math.hypot(body.w, body.h, body.d + reach * 2);
   return {
     group,
     screen,

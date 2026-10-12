@@ -119,6 +119,7 @@ counts page views with Vercel Web Analytics: no cookies, and nothing about your 
 | Waveshare ESP32-C6-LCD-1.47 | IPS LCD, ST7789V3, rounded corners | 172×320 | SPI 80 MHz |
 | Waveshare ESP32-S3-Touch-LCD-2 | IPS LCD, ST7789T3, touch (CST816D), IMU | 240×320 | SPI 80 MHz |
 | Waveshare ESP32-S3-Touch-AMOLED-1.32 | AMOLED, CO5300, round, touch (CST820) | 466×466 | QSPI 40 MHz |
+| Seeed Studio Round Display for XIAO (on a XIAO ESP32S3) | IPS LCD, GC9A01, round, touch (CHSC6X) | 240×240 | SPI 80 MHz |
 | Waveshare ESP32-S3-AMOLED-1.91 (and -Touch-, FT3168) | AMOLED, RM67162, IMU | 240×536 (536×240 landscape) | QSPI 40 MHz |
 | M5StickC Plus2 | LCD, ST7789V2 | 135×240 | SPI 40 MHz |
 | M5StickS3 | LCD, ST7789P3 | 135×240 | SPI 40 MHz |
@@ -323,7 +324,8 @@ the LED matrix instead of crashing on its first `leds` call.
 The App menu lists only the apps the chosen output and the board driving it can run; the examples
 left out follow, greyed out, each with why it won't run. Your own app always stays in the menu, and
 says so when the board couldn't run it. The board comes from the output: a
-board with a built-in display (M5StickC Plus2, M5StickS3, the Waveshare boards) is fixed,
+board with a built-in display (M5StickC Plus2, M5StickS3, the Waveshare boards, the XIAO behind
+Seeed's Round Display) is fixed,
 and a bare module or an LED chain gets a **Board** menu (`src/sim/boards.ts`: an ESP32-S3
 DevKitC-1 N16R8, an ESP32 DevKitC or a Seeed Studio XIAO ESP32S3; the 2.13" e-paper offers the
 Waveshare ESP32 e-Paper Driver Board and the DevKitC-1). A board brings

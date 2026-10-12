@@ -13,12 +13,15 @@ export type Tech = 'lcd' | 'amoled' | 'oled' | 'epaper' | 'led';
 export type Face = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
 
 export type EnclosurePart =
-  /** Clickable: `input` is the n-th button the sketch declares (Resident apps: 0 = A, 1 = B). */
-  | { kind: 'button'; face: Face; u: number; v: number; w: number; h: number; input?: number; color?: string; label?: string }
+  /** Clickable: `input` is the n-th button the sketch declares (Resident apps: 0 = A, 1 = B).
+   *  `z`: mm off the face, for a key on a board plugged in behind. */
+  | { kind: 'button'; face: Face; u: number; v: number; w: number; h: number; z?: number; input?: number; color?: string; label?: string }
   | { kind: 'port'; face: Face; u: number; v: number; w: number; h: number; label?: string }
   | { kind: 'header'; face: Face; u: number; v: number; pins: number; along: 'u' | 'v'; label?: string }
   | { kind: 'hole'; face: Face; u: number; v: number; r: number }
-  | { kind: 'led'; face: Face; u: number; v: number; r: number; color: string; label?: string };
+  | { kind: 'led'; face: Face; u: number; v: number; r: number; color: string; label?: string }
+  /** A box standing `z` mm off the face, `d` deep: a board plugged in behind, its sockets, its shield can. */
+  | { kind: 'block'; face: Face; u: number; v: number; w: number; h: number; d: number; z?: number; r?: number };
 
 /** The physical part around the glass, drawn as a ghosted wireframe in the 3D view (mm). */
 export interface Enclosure {

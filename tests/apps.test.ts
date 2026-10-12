@@ -17,10 +17,10 @@ import { Imu } from '../src/sim/inputs/imu';
 import { LD2410 } from '../src/sim/inputs/ld2410';
 
 // Every bundled app must boot and run without a Lua error on each kind of output it's written for:
-// display apps on a colour LCD in landscape and portrait, a portrait touch LCD, a round AMOLED, a landscape touch AMOLED,
+// display apps on a colour LCD in landscape and portrait, a portrait touch LCD, a round AMOLED, a small round touch LCD, a landscape touch AMOLED,
 // a tiny 1-bit OLED and e-paper; strip apps on a strip and a ring; matrix apps on every matrix size.
 const OUTPUTS: Record<'display' | 'strip' | 'matrix', DeviceProfile[]> = {
-  display: ['m5stickc-plus2', 'waveshare-esp32-c6-lcd-1.47', 'waveshare-esp32-s3-touch-lcd-2', 'waveshare-esp32-s3-touch-amoled-1.32', 'waveshare-esp32-s3-touch-amoled-1.91', 'ssd1306-128x32', 'waveshare-epd-2.13-v4'].map(
+  display: ['m5stickc-plus2', 'waveshare-esp32-c6-lcd-1.47', 'waveshare-esp32-s3-touch-lcd-2', 'waveshare-esp32-s3-touch-amoled-1.32', 'seeed-xiao-round-display', 'waveshare-esp32-s3-touch-amoled-1.91', 'ssd1306-128x32', 'waveshare-epd-2.13-v4'].map(
     (id) => findDevice(id)!,
   ),
   strip: [ledProfile({ kind: 'strip', count: 30 }), ledProfile({ kind: 'ring', count: 12 })],

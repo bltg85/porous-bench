@@ -49,6 +49,14 @@ export const BOARDS: Board[] = [
     note: '8 MB PSRAM: Lua and LVGL live there.',
   },
   {
+    // The same XIAO plugged into the back of the Round Display: the display takes all its pins.
+    id: 'seeed-xiao-esp32s3-round-display',
+    name: 'Seeed Studio XIAO ESP32S3 (behind the Round Display)',
+    libraries: ['screen', 'lgfx', 'lvgl'],
+    appRamKb: 8192,
+    note: '8 MB PSRAM: Lua and LVGL live there.',
+  },
+  {
     id: 'm5stickc-plus2',
     name: 'M5StickC Plus2 (ESP32-PICO-V3-02)',
     libraries: ['screen', 'lgfx', 'lvgl'],
