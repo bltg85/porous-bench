@@ -316,6 +316,7 @@ export function Guide() {
             <ul>
               <li>Waveshare ESP32-C6-LCD-1.47 (a narrow colour screen)</li>
               <li>Waveshare ESP32-S3-Touch-LCD-2 (a 2″ colour touch screen, with a motion sensor)</li>
+              <li>Seeed Studio Round Display for XIAO with a XIAO ESP32S3 plugged in behind it (a round colour touch screen)</li>
               <li>Waveshare 2.13″ e-Paper on the Waveshare ESP32 e-Paper Driver Board (black and white, readable in daylight, slow to change)</li>
               <li>M5StickC Plus2 or M5StickS3 (a small screen in a case, with buttons)</li>
             </ul>
