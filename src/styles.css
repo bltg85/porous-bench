@@ -1192,3 +1192,315 @@ dialog.about::backdrop {
 .about-links a {
   white-space: nowrap;
 }
+
+/* ---- guide ------------------------------------------------------------------------------- */
+
+/* The guide (guide.html): a long page of prose on the same paper, steps divided by hairlines like
+   the About sheet, a list of steps beside it on a wide window. */
+.guide {
+  min-height: 100%;
+}
+/* A link that opens Bench, dressed as one of its buttons. */
+a.guide-open,
+.toolbar a.guide-link {
+  display: inline-block;
+  border: 1px solid var(--control);
+  color: var(--blue);
+  font: 500 13px/1 var(--sans);
+  padding: 8px 12px;
+  text-decoration: none;
+}
+a.guide-open:hover,
+.toolbar a.guide-link:hover {
+  border-color: var(--blue);
+}
+.guide .toolbar {
+  justify-content: space-between;
+}
+.guide-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 720px);
+  justify-content: center;
+  gap: 56px;
+  padding: 40px 28px 80px;
+}
+.guide-toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+.guide-toc ol {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.guide-toc li {
+  border-top: 1px solid var(--rule);
+}
+.guide-toc a {
+  display: block;
+  padding: 8px 0;
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: none;
+}
+.guide-toc a:hover {
+  color: var(--blue);
+}
+.guide-toc-n {
+  display: inline-block;
+  width: 1.4em;
+  font: 500 11px/1 var(--mono);
+  color: var(--blue);
+}
+.guide-kicker,
+.guide-num {
+  margin: 0;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.guide-num {
+  color: var(--blue);
+}
+.guide-body h1 {
+  margin: 12px 0 20px;
+  font: 600 44px/1.05 var(--display);
+  letter-spacing: -0.01em;
+}
+.guide-body h2 {
+  margin: 10px 0 16px;
+  font: 600 30px/1.1 var(--display);
+}
+.guide-body h3 {
+  margin: 28px 0 8px;
+  font: 500 10px/1.4 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.guide-body p,
+.guide-body li,
+.guide-body dd {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.guide-body p {
+  margin: 0 0 14px;
+}
+.guide-body ul,
+.guide-body ol {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+.guide-body li {
+  margin-bottom: 6px;
+}
+.guide-body a {
+  color: var(--blue);
+  text-underline-offset: 3px;
+}
+.guide-body code {
+  font: 13px/1 var(--mono);
+}
+.guide-body pre {
+  margin: 10px 0 4px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+}
+.guide-body pre code {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.guide-body blockquote {
+  margin: 10px 0 4px;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--blue);
+  color: var(--muted);
+  font-style: italic;
+}
+.guide-body kbd {
+  font-size: 11px;
+  margin-right: 0;
+}
+.guide-lede {
+  font-size: 17px !important;
+  color: var(--ink);
+}
+/* A control in Bench, named as it appears there. */
+.ui {
+  font: 500 12px/1 var(--mono);
+  color: var(--blue);
+  padding: 2px 5px;
+  border: 1px solid var(--control);
+  background: var(--control-fill);
+  white-space: nowrap;
+}
+.guide-need {
+  margin: 28px 0 8px;
+  padding: 4px 20px 6px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+}
+.guide-need ul {
+  padding-left: 18px;
+}
+.guide-step {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: 16px;
+}
+.guide-terms {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 10px 20px;
+  margin: 0 0 16px;
+}
+.guide-terms dt {
+  font: 500 12px/1.65 var(--mono);
+  padding-top: 2px;
+}
+.guide-terms dd {
+  margin: 0;
+}
+/* Claude Code → Bench → the board, as three boxes and the arrows between them. */
+.guide-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  margin: 28px 0 8px;
+}
+.guide-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--control);
+  background: var(--paper);
+}
+.guide-box strong {
+  font: 600 18px/1 var(--display);
+}
+.guide-box span {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.guide-arrow {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 112px;
+  padding: 0 10px;
+}
+.guide-arrow span {
+  font: 400 10px/1.4 var(--mono);
+  color: var(--blue);
+  text-align: center;
+}
+.guide-arrow::after {
+  content: '→';
+  color: var(--blue);
+  font-size: 18px;
+  line-height: 1;
+}
+.guide-check {
+  padding: 10px 14px;
+  border-left: 2px solid var(--ok);
+  background: var(--paper);
+}
+.guide-check-label {
+  display: block;
+  margin-bottom: 2px;
+  font: 500 10px/1.4 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ok);
+}
+.guide-aside {
+  color: var(--muted);
+  font-size: 14px !important;
+}
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.guide-table th {
+  text-align: left;
+  font: 500 10px/1.4 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.guide-table td {
+  vertical-align: top;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.guide-table td:first-child {
+  width: 34%;
+}
+.guide-foot {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.guide-foot p {
+  margin: 0;
+  font-size: 13px !important;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .guide-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 28px 16px 64px;
+  }
+  .guide-toc {
+    position: static;
+    margin-bottom: 28px;
+  }
+  .guide-body h1 {
+    font-size: 34px;
+  }
+  .guide-terms {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .guide-terms dd {
+    margin-bottom: 10px;
+  }
+  /* The flow stacks, its arrows pointing down. */
+  .guide-flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .guide-arrow {
+    width: auto;
+    flex-direction: row;
+    padding: 8px 0;
+  }
+  .guide-arrow::after {
+    content: '↓';
+    order: -1;
+  }
+  .guide-table td:first-child {
+    width: 40%;
+  }
+}

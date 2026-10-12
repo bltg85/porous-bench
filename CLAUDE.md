@@ -54,7 +54,8 @@ apps; it can also mirror an app onto a real Resident board. Live at https://benc
 - **Other Claude sessions learn Bench from the prompts and the device skill.** When behaviour
   changes, update `prompt.ts`, `firmware.ts` (shipped firmware in `BENCH_FIRMWARE`, hardware
   lessons in `LESSONS`) and `docs/resident/DEVICE-SKILL.md` (prompts fetch it from GitHub `main`,
-  so it's live once pushed).
+  so it's live once pushed). People learn it from the guide at `/guide` (`src/ui/Guide.tsx`): keep its
+  steps true too; `tests/guide.test.ts` checks every control it names still exists.
 - **Firmware for a real board** lives in `firmware/<name>/`, one buildable PlatformIO project per
   stage of Resident's start-building guide, with a README of what bring-up taught. Ask before
   flashing a board.

@@ -47,7 +47,7 @@ The page has three columns. The **left** column holds the app: pick an **App**, 
 device**, and read the **Console**. The **desk** is in the middle. The **right** column holds
 the hardware: **Output**, where you choose what the app draws on, **Inputs**, where you put parts on
 the bench, and **Connections**, where you decide which part drives each of the app's controls. Click a section's
-heading to fold it away. **About**, top right, says what Bench is and what it's built on. Everything you set up (the output, your parts, the connections, where things
+heading to fold it away. **About**, top right, says what Bench is and what it's built on, and **Guide** opens a walkthrough for someone new to all of it ([bench.porous.systems/guide](https://bench.porous.systems/guide)): an example app, letting Claude write your own, putting it on a real board, then changing the outputs and inputs and wiring real parts. Everything you set up (the output, your parts, the connections, where things
 sit on the desk, folded sections) is saved in this browser and comes back on your next visit.
 
 **Share**, top right, copies a short link (`bench.porous.systems/s/…`) that opens your setup in
@@ -566,6 +566,7 @@ src/sim/            simulator core, framework-free
 src/resident/       Lua runtime: wasmoon host, Resident sandbox prelude, Bench drivers, relay, datetime
 src/resident-apps/  bundled Lua apps (Bench's examples and Resident's)
 src/ui/             React UI; ui/three/ builds the wireframe models from each enclosure
+  Guide.tsx           the walkthrough at /guide, a page of its own (guide.html, src/guide.tsx)
 src/share.ts        share links: making them, opening them, Back to my bench
   share-format.js     what a link carries and how it's written (shared with api/)
 api/                Vercel functions that keep short links' setups in Upstash Redis; plain

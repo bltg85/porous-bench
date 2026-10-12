@@ -345,6 +345,9 @@ export default function App({ shared = null }: { shared?: Opened | string | null
             title="Copy a short link that opens this setup in anyone's Bench: the output and board, your parts, the connections and the app. Bench keeps the setup on its server so the link stays short; anyone with the link can open it. If it can't be stored, you get a long link that carries the setup itself."
             text={() => shareLink(shareSetup(), `${location.origin}/`)}
           />
+          <a className="guide-link" href="/guide" target="_blank" title="A walkthrough: from an example app to a device on your desk">
+            Guide
+          </a>
           <About />
         </div>
       </header>
