@@ -80,7 +80,7 @@ describe('remote mirror', () => {
     expect(t.logs).toContain('event\ttap\tdriver\t0'); // Bench's button A: a tap on the device
   });
 
-  it("replays Bench's taps and holds, and ignores the board's own keys while mirroring", async () => {
+  it("replays Bench's taps and holds, and lets the board's own keys through, counted with them", async () => {
     const t = await device(`
       function on_event(ctx, e)
         if e.name == "tap" then log.info("tap", e.data.index, button.press_count()) end
@@ -95,12 +95,12 @@ describe('remote mirror', () => {
     g([2, 0, 0], [0, 1, 1]); // B let go
     await t.run(50);
     expect(t.logs).toEqual(['tap\t0\t1', 'tap\t0\t2', 'hold\t1\ttrue', 'hold\t1\tfalse']);
-    // The board's own key: its driver's events don't reach the app, and don't count.
+    // The board's own key: a press on the real board always reaches the app, its tap counted after Bench's.
     t.logs.length = 0;
     t.host.queue({ name: 'tap', channel: 'driver', data: { index: 0, count: 1 } });
     t.host.queue({ name: 'hold', channel: 'driver', data: { index: 0, held: true } });
     await t.run(50);
-    expect(t.logs).toEqual([]);
+    expect(t.logs).toEqual(['tap\t0\t3', 'hold\t0\ttrue']);
   });
 
   it("leaves the device's own events to the app", async () => {

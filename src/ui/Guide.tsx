@@ -361,8 +361,9 @@ export function Guide() {
             </Check>
             <p>
               That's <em>mirroring</em>: the board runs the app itself, and Bench feeds it the inputs. So you don't need any
-              real knobs or sensors yet: the ones on Bench's desk drive the board. While Bench mirrors, the board's own
-              buttons are ignored and <Key>A</Key> and <Key>B</Key> come from Bench, so both screens always agree. Pick
+              real knobs or sensors yet: the ones on Bench's desk drive the board. <Key>A</Key> and <Key>B</Key> on Bench
+              reach the board too, and its own buttons and touch screen keep working; Bench doesn't see those presses,
+              so after one the two screens can differ. Pick
               another app in Bench and the board switches to it.
             </p>
             <p>

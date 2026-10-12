@@ -49,9 +49,9 @@ apps; it can also mirror an app onto a real Resident board. Live at https://benc
   and part channels, Lua modules and Mirror stand-ins).
 - **The mirror shim is compiled on the device**, often in ~70 KB: keep `lua/remote.lua` small, put
   each stand-in between `-- @@part <module>` / `-- @@end` (sent only to apps that name it). While
-  Bench mirrors, the board's own keys are ignored and buttons A/B arrive as the taps and holds
-  Bench's host recognised (`gestureCounts()`); its own touch panel still reaches the app, along
-  with Bench's touches.
+  Bench mirrors, buttons A/B arrive as the taps and holds Bench's host recognised
+  (`gestureCounts()`) and touches as Bench saw them. Never suppress a physical input on the board:
+  its own keys and touch panel always reach the app, even though the two screens can then differ.
 - **Other Claude sessions learn Bench from the prompts and the device skill.** When behaviour
   changes, update `prompt.ts`, `firmware.ts` (shipped firmware in `BENCH_FIRMWARE`, hardware
   lessons in `LESSONS`) and `docs/resident/DEVICE-SKILL.md` (prompts fetch it from GitHub `main`,

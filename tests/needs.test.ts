@@ -60,7 +60,7 @@ describe('output capabilities', () => {
 
   it('says why an app does not fit', () => {
     const caps = outputCaps(epaper, driverBoard);
-    expect(misfits(appNeeds('-- @needs motion color\nlocal h = lvgl.bind("main")\n'), caps)).toEqual(['needs lvgl', 'animates', 'needs colour', 'needs ~45 KB']);
+    expect(misfits(appNeeds('-- @needs motion color\nlocal h = lvgl.bind("main")\n'), caps)).toEqual(['needs lvgl', 'animates', 'needs colour', 'needs ~46 KB']);
     expect(misfits(appNeeds('-- @needs 196x96\nscreen.text(40, 80, "from Resident")\n'), caps)).toEqual(['needs 196×96']);
     expect(misfits(appNeeds('-- @output matrix\nleds.show()\n'), caps)).toEqual(['written for an LED matrix']);
   });

@@ -126,11 +126,11 @@ Bench's Real device panel pushes the open app to a Resident device and drives it
   `buzzer` where the firmware has none, fed by `bench` events from Bench. Write against the API and it runs
   unchanged: the readings (the IMU's rotation rate included) and the `dial`, `trigger`, `motion`,
   `touch` and `presence` events arrive as they do in Bench.
-- Buttons A and B: the taps and holds Bench recognises are replayed on the board, and the board's
-  own keys are ignored while Bench mirrors, so both screens count the same. `button.press_count()`
-  counts Bench's taps. Touches on Bench's screen are replayed the same way, in order with their
-  points. The board's own touch panel still works while Bench mirrors, but Bench doesn't see those
-  touches, so after one the two screens can differ.
+- Buttons A and B: the taps and holds Bench recognises are replayed on the board. Touches on Bench's
+  screen are replayed the same way, in order with their points. The board's own keys and touch
+  panel still work while Bench mirrors: a press on the real board always reaches the app. Bench
+  doesn't see those, so after one the two screens can differ. `button.press_count()` and a tap's
+  `count` add up the taps from both.
 - E-paper: the real panel refreshes in the background, newest frame wins, exactly as Bench shows it.
 - Local time: Bench sends its time zone before each app, so `datetime.now()` reads the same on both
   screens on boards running Bench's firmware. Other firmware stays on UTC.
