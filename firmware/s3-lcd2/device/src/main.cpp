@@ -17,6 +17,7 @@
 #include "TouchDriver.h"
 #include "ImuDriver.h"
 #include "LvglTimerReaper.h"
+#include "AppStore.h"
 
 static constexpr const char* RESIDENT_HOST = "resident.inanimate.tech";
 static constexpr uint16_t RESIDENT_PORT = 443;
@@ -29,6 +30,7 @@ ImuDriver imuDriver;
 CanvasLgfxTarget lgfxMain;
 Resident::LgfxModule lgfxModule;
 Resident::LvglModule lvglModule;
+AppStore appStore;  // the last app for the next boot, on LittleFS (NVS is too small)
 LvglTimerReaper lvglTimerReaper;  // stops the last app's lvgl.Timers on each app load
 
 static void printMemory(const char* when) {
@@ -58,6 +60,7 @@ static Resident::SandboxConfig makeConfig() {
                     &lvglTimerReaper};
   cfg.systemDisplay = &screenDriver;
   cfg.systemButton = &buttonDriver;  // tap = load the saved app now, hold = forget it
+  cfg.persistentStore = &appStore;
 
   // Courier::Config has a constructor with default args, so designated
   // initializers don't compile under strict ESP-IDF builds.
@@ -116,6 +119,7 @@ void setup() {
     sandbox.setTimezone(tz.c_str());
   });
 
+  appStore.begin();  // Resident doesn't start a store the board supplies
   sandbox.setup();
   printMemory("after Resident");
 }

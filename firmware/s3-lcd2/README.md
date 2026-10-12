@@ -57,6 +57,11 @@ Brought up and tested on hardware 2026-10-12: device type `s3-lcd2`, firmware `s
   on serial) and holding its memory. `LvglTimerReaper.h` stops them on every app reset with
   luavgl's own `delete`. Bench runs each app in a fresh Lua state, so the browser never shows it.
   Not fixed in Resident 0.10.2 or its main branch.
+- **Saved apps outgrew NVS.** Resident keeps the last app that loaded cleanly, for the next boot, as
+  an NVS blob by default. NVS here is 20 KB and also holds Wi-Fi and the `store` module, so a 17.6 KB
+  app failed to save (`persist_too_big`, nothing on screen) and a reboot brought back an older,
+  smaller one. `AppStore.h` keeps the app as `/app.lua` on the 12 MB LittleFS partition instead
+  (formatted on first boot, Wi-Fi untouched), logging `[store] app saved/loaded: N bytes`.
 - **Battery:** GPIO5 (ADC1 channel 4) through a divider; stage 1 shows the pin's millivolts, and
   there's no driver for it.
 - **Wi-Fi:** the factory firmware left a saved network (`WSTEST`); WiFiManager tried it for 20 s, then
