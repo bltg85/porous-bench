@@ -4,7 +4,7 @@
 -- none. Each sits between "@@part <module>" and "@@end" lines: Bench sends only the parts the app
 -- names, since every line here costs compile memory on the device. Bench's buttons A and B arrive
 -- as the taps and holds Bench recognised, and touches on Bench's screen as touch_* events; the
--- board's own keys and touch panel are ignored while it mirrors.
+-- board's own keys are ignored while it mirrors, its touch panel isn't.
 local __bench = { d = {}, t = {}, s = {}, g = {} }
 local __now = function() return (time and time.ticks_ms) and time.ticks_ms() or 0 end
 
@@ -208,8 +208,9 @@ do
       __bench_apply(ctx, e.data or {}, deliver)
       return
     end
-    -- The board's own keys: Bench's buttons stand in for them, or the two screens would drift.
-    if (e.name == "tap" or e.name == "hold" or e.name == "button" or e.name:sub(1, 6) == "touch_") and e.channel ~= "app" then return end
+    -- The board's own keys: Bench's buttons stand in for them, or the two screens would drift. Its
+    -- touch panel gets through: someone holding a touch screen touches it (Bench doesn't see those).
+    if (e.name == "tap" or e.name == "hold" or e.name == "button") and e.channel ~= "app" then return end
     if app_on_event then return app_on_event(ctx, e) end
   end
 end

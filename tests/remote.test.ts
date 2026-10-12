@@ -239,7 +239,7 @@ describe('remote mirror', () => {
     expect(t.logs).toEqual(['nil']);
   });
 
-  it("replays Bench's touches on a real board in order, and ignores the board's own touch panel", async () => {
+  it("replays Bench's touches on a real board in order, and lets the board's own touch panel through", async () => {
     const t = await device(`
       function on_event(ctx, e)
         if e.name:sub(1, 6) == "touch_" then log.info(e.name, e.data.x, e.data.y, tostring(touchscreen.read().pressed)) end
@@ -256,7 +256,7 @@ describe('remote mirror', () => {
     t.logs.length = 0;
     t.host.queue({ name: 'touch_tap', channel: 'driver', data: { x: 1, y: 1 } }); // the board's own panel
     await t.run(30);
-    expect(t.logs).toEqual([]);
+    expect(t.logs.map((l) => l.split('\t').slice(0, 3).join(' '))).toEqual(['touch_tap 1 1']);
   });
 
   it('tells apps on the round AMOLED that the screen is round and in colour', async () => {

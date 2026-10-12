@@ -483,7 +483,9 @@ has none of Bench's drivers, the shim defines `dial`, `trigger`, `light`, `pir`,
 the app names, minified, since a board without PSRAM compiles it in ~70 KB. It also raises the
 driver events the app would get on Bench (`dial`, `trigger`, `motion`, `touch`). Buttons A and B
 arrive as the taps and holds Bench recognised, and the board's own keys are ignored while Bench
-mirrors, so both screens count the same. Every other event still reaches the app. A driver the firmware does have, like an M5Stick's own IMU,
+mirrors, so both screens count the same. Touches on Bench's screen are replayed too, and the board's
+own touch panel still reaches the app (Bench doesn't see those touches). Every other event still
+reaches the app. A driver the firmware does have, like an M5Stick's own IMU,
 stays the real one. Error line numbers on the device are offset by the shim's length.
 
 The relay doesn't accept calls from web pages, so Bench sends through its own origin: `/relay/…`
