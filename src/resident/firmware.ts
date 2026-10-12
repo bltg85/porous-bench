@@ -44,7 +44,9 @@ const BENCH_FIRMWARE: Record<string, { path: string; tested: boolean; note?: str
 
 /** What bringing up Resident on real boards has taught, for hardware without firmware yet. */
 const DISPLAY_LESSONS = [
+  '- Push only what changed: each LVGL flush its own rectangle, an `lgfx`/`screen` flip only the rows drawn since the last one (a canvas subclass that records them). On the S3-Touch-LCD-2 that, LVGL\'s draw buffer in internal RAM and `-O2` took a flame from 3.4 to 28 fps; `firmware/s3-lcd2/device/lib/drivers/src/Lcd.cpp` in Bench\'s repo does it. Check the glass after changing the panel driver: an esp_lcd DMA driver completed every transfer and showed nothing.',
   '- `flip()` must not wait for a slow panel: Resident aborts a Lua dispatch after 1 s. Snapshot the frame, return, and refresh from the driver\'s `update()`; for e-paper, one refresh at a time, newest frame wins, skip a frame identical to the one on the glass.',
+  '- With `lvgl`, stop the outgoing app\'s `lvgl.Timer`s on every app reset: Resident keeps one Lua state for the board\'s life and luavgl keeps timers in its registry, so they outlive their app and call into its deleted objects (an error box on the screen, not on serial). `LvglTimerReaper.h` in Bench\'s S3-Touch-LCD-2 firmware (`firmware/s3-lcd2/device/lib/drivers/`) does it.',
   '- On a 1-bit panel, give the `lgfx` module a `Resident::LgfxTarget` that draws into the same 1-bit canvas as `screen` (luminance >= 50% is white) instead of a full RGB565 sprite.',
 ];
 const LESSONS = [

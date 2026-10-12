@@ -76,7 +76,7 @@ public:
   int32_t width() override { return Lcd::WIDTH; }
   int32_t height() override { return Lcd::HEIGHT; }
 
-  void flip() override { Lcd::present(); }
+  void flip() override { Lcd::presentDirty(); }  // only the rows drawn since the last flip
 
 private:
   static GFXcanvas16& cv() { return *Lcd::canvas; }

@@ -200,7 +200,7 @@ int ScreenDriver::qr(lua_State* L) {
 
 int ScreenDriver::flip(lua_State* L) {
   (void)L;
-  Lcd::present();
+  Lcd::presentDirty();
   return 0;
 }
 

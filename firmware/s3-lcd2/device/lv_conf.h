@@ -131,7 +131,7 @@
         * The circumference of 1/4 circle are saved for anti-aliasing
         * radius * 4 bytes are used per circle (the most often used radiuses are saved)
         * 0: to disable caching */
-        #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 4
+        #define LV_DRAW_SW_CIRCLE_CACHE_SIZE 32  /* s3-lcd2: a flame is many ovals */
     #endif
 
     #define  LV_USE_DRAW_SW_ASM     LV_DRAW_SW_ASM_NONE
@@ -297,7 +297,7 @@
 #define LV_COLOR_MIX_ROUND_OFS  0
 
 /* Add 2 x 32 bit variables to each lv_obj_t to speed up getting style properties */
-#define LV_OBJ_STYLE_CACHE      0
+#define LV_OBJ_STYLE_CACHE      1  /* s3-lcd2: faster style lookups while drawing */
 
 /* Add `id` field to `lv_obj_t` */
 #define LV_USE_OBJ_ID           1

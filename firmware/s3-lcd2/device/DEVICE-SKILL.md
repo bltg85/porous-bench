@@ -223,8 +223,13 @@ end
 - **240×320, 16-bit colour, dark scheme.**
 - **Text**: lgfx/screen use the built-in 6x8 font in whole multiples (size 1 fits 40 characters
   across, size 2 fits 20, size 3 fits 13); LVGL has Montserrat. Both are ASCII only.
-- **Frame rate**: `flip()` pushes the whole frame in ~25 ms. `on_tick` runs every 100 ms; for
-  smoother animation use LVGL and an `lvgl.Timer` (~30 fps).
+- **Frame rate**: `flip()` pushes only the rows drawn since the last flip (a full frame ~25 ms),
+  so redraw only what moves. `on_tick` runs every 100 ms; an `lvgl.Timer` runs
+  at ~30 fps, and an lgfx app can use one too: `lvgl.bind("main")` first, then `lgfx.bind("main")`
+  (the last bind owns the screen, the timer keeps running).
+- **LVGL cost**: each `obj:set{}` costs ~0.3-0.6 ms, and LVGL repaints everything under whatever
+  changed, translucent layers included (expensive). Up to ~15 moving objects keep 30 fps; for more
+  moving shapes (a flame, particles), draw rows with lgfx.
 - **Memory**: Lua and LVGL live in 8 MB of PSRAM, so app size is rarely a limit. Each callback
   still has to finish within 1000 ms.
 - One key (index 0). No buzzer.

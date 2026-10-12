@@ -103,6 +103,14 @@ crawl on the glass. `on_tick` comes every 100 ms; a tick that takes longer (its 
   - Don't create closures or tables in a loop that runs each frame: they're garbage in a small heap.
   - Fewer, bigger draw calls: merge rows of one colour into one `fillRect`, and step soft
     things (glows, gradients) 4 rows at a time.
+- **ESP32-S3 with LVGL (S3-Touch-LCD-2, Bench's firmware):** each `obj:set{}` costs ~0.3-0.6 ms,
+  and LVGL repaints everything under whatever changed: a flame of 25 moving gradient ovals over
+  three translucent glow ovals ran at 3.4 fps (12 once the glow was opaque and still). The same
+  flame drawn row by row with `lgfx`, redrawing only where it moved, runs at 28. For many moving
+  shapes use `lgfx`; for LVGL, few objects, opaque ones, and leave big ones still.
+- **Faster than `on_tick` with `lgfx`:** `lvgl.Timer` runs at ~30 fps on boards with `lvgl`. Bind
+  LVGL first and `lgfx` last (the last bind owns the screen; the timer keeps running), and fall
+  back to `on_tick` where `lvgl` is nil.
 - **Stiff springs at 10 Hz:** a spring that's stable at 30 fps can blow up at a 100 ms tick. Step
   it in 10 ms slices inside `on_tick`.
 - **Measure on the board:** log the average `dt_ms` over 30 ticks (`log.info`) and read the

@@ -16,6 +16,7 @@
 #include "ButtonsDriver.h"
 #include "TouchDriver.h"
 #include "ImuDriver.h"
+#include "LvglTimerReaper.h"
 
 static constexpr const char* RESIDENT_HOST = "resident.inanimate.tech";
 static constexpr uint16_t RESIDENT_PORT = 443;
@@ -28,6 +29,7 @@ ImuDriver imuDriver;
 CanvasLgfxTarget lgfxMain;
 Resident::LgfxModule lgfxModule;
 Resident::LvglModule lvglModule;
+LvglTimerReaper lvglTimerReaper;  // stops the last app's lvgl.Timers on each app load
 
 static void printMemory(const char* when) {
   Serial.printf("[mem] %s: internal free %u (largest %u, lowest %u), PSRAM free %u (largest %u)\n", when,
@@ -43,10 +45,17 @@ static Resident::SandboxConfig makeConfig() {
   cfg.deviceType = "s3-lcd2";
   cfg.firmwareVersion = "s3-lcd2-0.1";
   lgfxModule.addDisplay("main", &lgfxMain);
-  // LVGL's display and its draw buffer are only allocated when an app first
-  // calls lvgl.bind("main"); it flushes into the same frame as screen/lgfx.
-  lvglModule.addDisplay("main");
-  cfg.extensions = {&screenDriver, &buttonDriver, &touchDriver, &imuDriver, &lgfxModule, &lvglModule};
+  // LVGL's display is only created when an app first calls lvgl.bind("main");
+  // it flushes into the same frame as screen/lgfx. Its draw buffer is ours, in
+  // internal RAM: LVGL's own (a tenth of the screen, from lv_malloc) landed
+  // in PSRAM, where rendering is slower, and took ten strips a frame.
+  Resident::LvglModule::DisplayOptions lv;
+  lv.bufferRows = 80;
+  lv.bufferBytes = 240 * 80 * 2;
+  lv.buffer = heap_caps_malloc(lv.bufferBytes, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+  lvglModule.addDisplay("main", lv);
+  cfg.extensions = {&screenDriver, &buttonDriver, &touchDriver, &imuDriver, &lgfxModule, &lvglModule,
+                    &lvglTimerReaper};
   cfg.systemDisplay = &screenDriver;
   cfg.systemButton = &buttonDriver;  // tap = load the saved app now, hold = forget it
 
@@ -112,7 +121,26 @@ void setup() {
 }
 
 void loop() {
+  static uint32_t loops = 0, loopUs = 0, loopMax = 0, lastStats = 0;
+  uint32_t t0 = micros();
   sandbox.loop();
+  uint32_t us = micros() - t0;
+  loops++;
+  loopUs += us;
+  loopMax = max(loopMax, us);
+
+  // Every 30 s: how frames are spent (Resident's loop runs Lua, LVGL's drawing and the pushes).
+  if (millis() - lastStats >= 30000) {
+    float secs = (millis() - lastStats) / 1000.0f;
+    lastStats = millis();
+    uint32_t frames, rows, pushUs;
+    Lcd::takeStats(frames, rows, pushUs);
+    Serial.printf("[perf] %.1f pushes/s, %lu rows each, %.1f ms a push; loop %.1f ms avg, %.1f ms max\n",
+                  frames / secs, (unsigned long)(frames ? rows / frames : 0),
+                  frames ? pushUs / 1000.0f / frames : 0.0f, loops ? loopUs / 1000.0f / loops : 0.0f,
+                  loopMax / 1000.0f);
+    loops = loopUs = loopMax = 0;
+  }
 
   static uint32_t lastBeat = 0;
   if (millis() - lastBeat >= 30000) {
