@@ -25,10 +25,11 @@ void openShared().then((shared) =>
       <ErrorBoundary fallback={(error) => <Crashed error={error} />}>
         <App shared={shared} />
       </ErrorBoundary>
-      {/* Page views only, no cookies. The query and hash never leave: they could carry a device ID or a shared app. */}
+      {/* Page views only, no cookies. The query, the hash and a short link's id never leave: they could
+          carry a device ID or open someone's app. */}
       <Analytics
         mode={import.meta.env.DEV ? 'development' : 'production'}
-        beforeSend={(e) => ({ ...e, url: e.url.split(/[?#]/)[0] })}
+        beforeSend={(e) => ({ ...e, url: e.url.split(/[?#]/)[0].replace(/\/s\/[^/]*$/, '/s') })}
       />
     </StrictMode>,
   ),

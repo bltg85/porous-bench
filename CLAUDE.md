@@ -13,6 +13,10 @@ apps; it can also mirror an app onto a real Resident board. Live at https://benc
   (`needs.ts`), the mirror to a real board (`remote.ts` + `lua/remote.lua`, the shim it wraps apps
   in), and the prompts Bench copies for Claude (`prompt.ts` for apps, `firmware.ts` for firmware).
 - `src/resident-apps/`: bundled Lua apps. `docs/resident/DEVICE-SKILL.md`: Bench's device skill.
+- `src/share.ts`: share links. A long link carries the setup after `#share=`
+  (`src/share-format.js`); a short one, `/s/<id>`, names it, kept in Upstash Redis by the Vercel
+  functions in `api/` (the dev server keeps them in memory). `api/` and the format are plain
+  JavaScript checked through JSDoc: Vercel's builder can't compile TypeScript 7.
 - `firmware/`: Resident firmware Bench ships for real boards (PlatformIO; Resident pinned by commit).
 - `my-apps/`: the user's own apps. Ignored by this repo and its own git repo (`npm run my-apps`).
 
@@ -40,8 +44,9 @@ apps; it can also mirror an app onto a real Resident board. Live at https://benc
   schematic, leaving out straps, flash/PSRAM, USB and what the board uses; `i2c.own` when its own
   chips share the I2C bus, `keys` for the pins Bench's firmware reads), which the Wiring view and
   the firmware prompt wire parts to, and an outline on the 3D desk (`MCU` in
-  `src/ui/three/peripherals.ts`) unless it has a display of its own. Keep the Boards table in DEVICE-SKILL.md in step
-  (`tests/device-skill.test.ts` checks its displays, boards, Lua modules and Mirror stand-ins).
+  `src/ui/three/peripherals.ts`) unless it has a display of its own. Keep the Boards table and the share-link ids in
+  DEVICE-SKILL.md in step (`tests/device-skill.test.ts` checks its displays, boards, share-link ids
+  and part channels, Lua modules and Mirror stand-ins).
 - **The mirror shim is compiled on the device**, often in ~70 KB: keep `lua/remote.lua` small, put
   each stand-in between `-- @@part <module>` / `-- @@end` (sent only to apps that name it). While
   Bench mirrors, the board's own keys are ignored and buttons A/B arrive as the taps and holds

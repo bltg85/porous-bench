@@ -1,5 +1,8 @@
 {
-  "rewrites": [{ "source": "/relay/devices/:id/send", "destination": "https://resident.inanimate.tech/devices/:id/send" }],
+  "rewrites": [
+    { "source": "/relay/devices/:id/send", "destination": "https://resident.inanimate.tech/devices/:id/send" },
+    { "source": "/s/:id", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

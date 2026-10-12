@@ -16,7 +16,7 @@ import { MATRIX_SIZES, type Output, type OutputKind, RING_COUNTS, STRIP_COUNTS }
 import { devices, outputDevice } from './sim/devices';
 import { type LogLine, SketchRun } from './sim/runner';
 import type { InputSpecs, Sketch } from './sim/sketch';
-import { backToMyBench, keepShared, LONG_LINK, type Opened, openedNote, type Setup, shareLink } from './share';
+import { backToMyBench, keepShared, type Opened, openedNote, type Setup, shareLink } from './share';
 import { About } from './ui/About';
 import { Console } from './ui/Console';
 import { Copy } from './ui/Copy';
@@ -341,9 +341,9 @@ export default function App({ shared = null }: { shared?: Opened | string | null
           <Copy
             className=""
             label="Share"
-            done={(link) => (link.length > LONG_LINK ? 'Long link copied' : 'Link copied')}
-            title={`Copy a link that opens this setup in anyone's Bench: the output and board, your parts, the connections and the app (your own goes in as its code). A link over ${LONG_LINK.toLocaleString('en')} characters is too long for chat apps with a message limit, like Discord; email, Slack and iMessage take it whole.`}
-            text={() => shareLink(shareSetup(), location.origin + location.pathname)}
+            done={(link) => (link.includes('#share=') ? 'Copied a long link' : 'Link copied')}
+            title="Copy a short link that opens this setup in anyone's Bench: the output and board, your parts, the connections and the app. Bench keeps the setup on its server so the link stays short; anyone with the link can open it. If it can't be stored, you get a long link that carries the setup itself."
+            text={() => shareLink(shareSetup(), `${location.origin}/`)}
           />
           <About />
         </div>

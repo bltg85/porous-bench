@@ -1,8 +1,9 @@
 // A link that opens your setup in someone else's Bench: the output and the board driving it, the
 // parts you put on the bench, what each of the app's controls is connected to, and the app (a
-// bundled one by its id, your own as its code). It all rides in the link's fragment, compressed. The
-// part after # is never sent to a server, so the code goes from one browser to the other and
-// nowhere else.
+// bundled one by its id, your own as its code). Share stores the setup on Bench's server and gives
+// a short link, /s/<id>, that fits anywhere a link goes (LinkedIn caps a whole post at 3,000
+// characters). If it can't be stored, Share gives the long link, which carries the setup itself
+// after #share= (src/share-format.js) and never reaches a server.
 //
 // Opening a link writes the setup where Bench keeps its own (localStorage, read on start) before
 // the first render. What it replaces is kept until you choose: the note saying a link was opened
@@ -10,22 +11,13 @@
 
 import { type LiveApp, session } from './resident/session';
 import { residentApps } from './resident-apps';
+import { decodeSetup, encodeSetup, type Setup } from './share-format';
 import { boardsFor } from './sim/boards';
-import { CHANNELS, type PartSpec } from './sim/controls/bench';
+import { CHANNELS } from './sim/controls/bench';
 import { outputDevice } from './sim/devices';
-import { MATRIX_SIZES, type Output, RING_COUNTS, STRIP_COUNTS } from './sim/leds';
+import { MATRIX_SIZES, RING_COUNTS, STRIP_COUNTS } from './sim/leds';
 
-/** Everything a link carries. */
-export interface Setup {
-  output: Output;
-  board: string;
-  /** The parts you added (the board's own come with the board). */
-  parts: PartSpec[];
-  /** Each of the app's controls, by name: the part and channel it reads ('part:channel', or 'none'). */
-  connections: Record<string, string>;
-  /** A bundled app by its id, or your own as its code. */
-  app: { bundled: string } | { name: string; code: string; description?: string };
-}
+export type { Setup };
 
 /** What opening a link did, for the note that says so. */
 export interface Opened {
@@ -38,33 +30,37 @@ export interface Opened {
 }
 
 const PREFIX = '#share=';
-/** The format, first in the data: a later Bench can still read links made today. */
-const VERSION = '1';
-/** Decompressed, a link Bench made is far smaller than this; a bigger one isn't read. */
-const MAX_BYTES = 1 << 20;
-/** Over this many characters, chat apps with a message limit (Discord's is 2,000) cut a link off. */
-export const LONG_LINK = 2000;
+/** A short link's path: /s/ and the id its setup is stored under (api/_share.js). */
+const SHORT = /^\/s\/([A-Za-z0-9_-]{12})$/;
 /** What the last link opened replaced, and what it opened, until you choose. */
 const PENDING = 'bench:shared';
 /** The keys a link writes (App's persisted settings, the bench's parts, the connections) and the
  *  app that becomes yours: what "Back to my bench" puts back. */
 const REPLACED = /^bench:(sketch|device|output-(kind|strip|ring|matrix)|boards|parts|resident:live|binding:.*)$/;
 
-/** A link to `base` (the page's address, without a fragment) that opens `setup`. */
+/**
+ * A link to Bench at `base` (its origin and a slash) that opens `setup`: the short one if the setup
+ * can be stored there, else the long one.
+ */
 export async function shareLink(setup: Setup, base: string): Promise<string> {
-  const packed = await through(new TextEncoder().encode(JSON.stringify(setup)), new CompressionStream('deflate-raw'));
-  return `${base}${PREFIX}${VERSION}.${toBase64Url(packed)}`;
+  const data = await encodeSetup(setup);
+  try {
+    const r = await fetch(`${base}api/share`, { method: 'POST', body: data, headers: { 'content-type': 'text/plain' } });
+    if (r.ok) return `${base}s/${((await r.json()) as { id: string }).id}`;
+  } catch {
+    /* offline, or no server (a static copy of Bench): the long link carries it all */
+  }
+  return `${base}${PREFIX}${data}`;
 }
 
-/** The setup in a link's fragment (`#share=…`); null if it's damaged or cut short. */
+/** The long link to `base` that carries `setup` itself. */
+export async function longLink(setup: Setup, base: string): Promise<string> {
+  return `${base}${PREFIX}${await encodeSetup(setup)}`;
+}
+
+/** The setup in a long link's fragment (`#share=…`); null if it's damaged or cut short. */
 export async function readLink(hash: string): Promise<Setup | null> {
-  if (!hash.startsWith(`${PREFIX}${VERSION}.`)) return null;
-  try {
-    const bytes = await through(fromBase64Url(hash.slice(PREFIX.length + VERSION.length + 1)), new DecompressionStream('deflate-raw'), MAX_BYTES);
-    return asSetup(JSON.parse(new TextDecoder().decode(bytes)));
-  } catch {
-    return null;
-  }
+  return hash.startsWith(PREFIX) ? decodeSetup(hash.slice(PREFIX.length)) : null;
 }
 
 /**
@@ -127,18 +123,30 @@ export function openedNote(o: Opened): string {
 
 /**
  * Call once before the first render. Opens the share link the page was loaded with, if it was: keeps
- * what the setup replaces, writes it, loads its app, and takes it out of the address bar, so a reload
- * keeps the setup without opening the link again. Returns what a link opened, until you've chosen to
- * keep it or go back (a string: why the link couldn't be opened).
+ * what the setup replaces, writes it, loads its app, and takes the link out of the address bar, so a
+ * reload keeps the setup without opening the link again. Returns what a link opened, until you've
+ * chosen to keep it or go back (a string: why the link couldn't be opened).
  */
 export async function openShared(): Promise<Opened | string | null> {
-  // A link pasted into a tab already on Bench changes only the fragment: open it as a fresh page.
+  // A long link pasted into a tab already on Bench changes only the fragment: open it as a fresh page.
   addEventListener('hashchange', () => location.hash.startsWith(PREFIX) && location.reload());
   const pending = readPending();
-  if (!location.hash.startsWith(PREFIX)) return pending?.opened ?? null;
-  const setup = await readLink(location.hash);
-  history.replaceState(null, '', location.pathname + location.search);
-  if (!setup) return "That share link didn't open: it's damaged or cut short (chat apps with a message limit cut long links off). Your bench is as it was.";
+  const short = SHORT.exec(location.pathname);
+  if (!short && !location.hash.startsWith(PREFIX)) return pending?.opened ?? null;
+  let setup: Setup | null = null;
+  let why = "That share link didn't open: it's damaged or cut short (chat apps with a message limit cut long links off). Your bench is as it was.";
+  if (short) {
+    try {
+      const r = await fetch(`/api/share/${short[1]}`);
+      if (r.ok) setup = await decodeSetup(await r.text());
+      else if (r.status === 404) why = "That share link didn't open: nothing is stored under it. Check that the whole link was copied. Your bench is as it was.";
+    } catch {
+      // The link stays in the address bar, so a reload tries again.
+      return "That share link didn't open: Bench's server couldn't be reached. Reload to try again.";
+    }
+  } else setup = await readLink(location.hash);
+  history.replaceState(null, '', (short ? '/' : location.pathname) + location.search);
+  if (!setup) return why;
   try {
     // Opened link after link without choosing, "Back to my bench" still goes back to yours.
     const before = pending?.before ?? snapshot(localStorage);
@@ -194,59 +202,6 @@ export function snapshot(store: Storage): Record<string, string> {
 export function restore(store: Storage, before: Record<string, string>): void {
   for (const k of keys(store)) if (REPLACED.test(k) && !Object.hasOwn(before, k)) store.removeItem(k);
   for (const [k, v] of Object.entries(before)) store.setItem(k, v);
-}
-
-// ---- the encoding --------------------------------------------------------------------------------
-
-/** A decoded link's JSON as a Setup, or null if it isn't one (the rest is checked as it's applied). */
-function asSetup(v: unknown): Setup | null {
-  const s = v as Partial<Setup> | null;
-  const app = s?.app as Record<string, unknown> | undefined;
-  const ok =
-    typeof s?.output?.kind === 'string' &&
-    typeof s.board === 'string' &&
-    Array.isArray(s.parts) &&
-    s.parts.every((p) => typeof p?.id === 'string' && typeof p.kind === 'string' && typeof p.label === 'string') &&
-    typeof s.connections === 'object' &&
-    s.connections !== null &&
-    Object.values(s.connections).every((c) => typeof c === 'string') &&
-    (typeof app?.bundled === 'string' ||
-      (typeof app?.name === 'string' && typeof app.code === 'string' && (app.description === undefined || typeof app.description === 'string')));
-  return ok ? (s as Setup) : null;
-}
-
-/** Runs bytes through a (de)compression stream, giving up past `limit` bytes out. */
-async function through(bytes: Uint8Array<ArrayBuffer>, stream: CompressionStream | DecompressionStream, limit = Infinity): Promise<Uint8Array<ArrayBuffer>> {
-  const reader = new Blob([bytes]).stream().pipeThrough(stream).getReader();
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.length;
-    if (size > limit) {
-      await reader.cancel();
-      throw new Error(`more than ${limit} bytes`);
-    }
-    chunks.push(value);
-  }
-  const out = new Uint8Array(size);
-  let at = 0;
-  for (const c of chunks) {
-    out.set(c, at);
-    at += c.length;
-  }
-  return out;
-}
-
-/** Base64 with the URL-safe alphabet and no padding: nothing a chat app or browser rewrites. */
-function toBase64Url(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-function fromBase64Url(text: string): Uint8Array<ArrayBuffer> {
-  return Uint8Array.from(atob(text.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 }
 
 function keys(store: Storage): string[] {

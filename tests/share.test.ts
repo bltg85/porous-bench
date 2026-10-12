@@ -6,33 +6,8 @@ import { residentApps } from '../src/resident-apps';
 import { boardsFor } from '../src/sim/boards';
 import { DEFAULT_PARTS } from '../src/sim/controls/bench';
 import { findDevice, outputDevice } from '../src/sim/devices';
-import { applySetup, LONG_LINK, readLink, restore, type Setup, shareLink, snapshot } from '../src/share';
-
-/** localStorage, in memory. */
-class MemoryStorage implements Storage {
-  private map = new Map<string, string>();
-  get length() {
-    return this.map.size;
-  }
-  key(i: number) {
-    return [...this.map.keys()][i] ?? null;
-  }
-  getItem(k: string) {
-    return this.map.get(k) ?? null;
-  }
-  setItem(k: string, v: string) {
-    this.map.set(k, String(v));
-  }
-  removeItem(k: string) {
-    this.map.delete(k);
-  }
-  clear() {
-    this.map.clear();
-  }
-  all() {
-    return Object.fromEntries(this.map);
-  }
-}
+import { applySetup, longLink, readLink, restore, type Setup, snapshot } from '../src/share';
+import { MemoryStorage } from './memory-storage';
 
 const BASE = 'https://bench.porous.systems/';
 const C6 = 'waveshare-esp32-c6-lcd-1.47';
@@ -50,20 +25,20 @@ const ownApp: Setup = {
 
 describe('share links', () => {
   it('carry a setup there and back, in characters nothing rewrites', async () => {
-    const link = await shareLink(ownApp, BASE);
+    const link = await longLink(ownApp, BASE);
     expect(link).toMatch(/^https:\/\/bench\.porous\.systems\/#share=1\.[A-Za-z0-9_-]+$/);
     expect(await readLink(link.slice(BASE.length))).toEqual(ownApp);
   });
 
-  it('name a bundled app instead of carrying its code, so the link stays short', async () => {
-    const link = await shareLink({ ...ownApp, app: { bundled: 'swiss-clock' } }, BASE);
-    expect(link.length).toBeLessThan(LONG_LINK / 4);
+  it('name a bundled app instead of carrying its code, so even the long link stays short', async () => {
+    const link = await longLink({ ...ownApp, app: { bundled: 'swiss-clock' } }, BASE);
+    expect(link.length).toBeLessThan(500);
   });
 
   it('open every bundled app', async () => {
     for (const a of residentApps) {
       const store = new MemoryStorage();
-      const link = await shareLink({ ...ownApp, app: { bundled: a.id } }, BASE);
+      const link = await longLink({ ...ownApp, app: { bundled: a.id } }, BASE);
       const { live, opened } = applySetup((await readLink(link.slice(BASE.length)))!, store);
       // App lists bundled apps as `resident:<id>` and starts on bench:sketch.
       expect(json(store, 'sketch')).toBe(`resident:${a.id}`);
@@ -72,13 +47,13 @@ describe('share links', () => {
   });
 
   it('read as damaged when cut short or mangled, not as half a setup', async () => {
-    const hash = (await shareLink(ownApp, BASE)).slice(BASE.length);
+    const hash = (await longLink(ownApp, BASE)).slice(BASE.length);
     expect(await readLink(hash.slice(0, hash.length / 2))).toBeNull();
     expect(await readLink(hash.slice(0, -1) + '!')).toBeNull();
     expect(await readLink('#share=1.')).toBeNull();
     expect(await readLink('#share=9.abc')).toBeNull();
     // Valid JSON, compressed right, but not a setup.
-    const notSetup = (await shareLink({ hello: 'there' } as unknown as Setup, BASE)).slice(BASE.length);
+    const notSetup = (await longLink({ hello: 'there' } as unknown as Setup, BASE)).slice(BASE.length);
     expect(await readLink(notSetup)).toBeNull();
   });
 

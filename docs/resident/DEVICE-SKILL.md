@@ -128,6 +128,98 @@ Bench's Real device panel pushes the open app to a Resident device and drives it
   Bench only knows the relay took it. Bench's App menu lists only the apps that fit the chosen board,
   and says why the others won't run.
 
+## Share links: open an app in Bench
+
+A share link opens an app in anyone's Bench on the hardware it was written for: the output, the
+board, the parts on the bench and what each control is connected to. When an app is done, give the
+user one as well as the file. A link the user pastes tells you their setup. There are two kinds:
+
+```
+https://bench.porous.systems/#share=1.<data>     a long link: the setup itself, after the #
+https://bench.porous.systems/s/<id>              a short link: the setup stored on Bench's server
+```
+
+`<data>` is the setup as JSON, compressed with raw DEFLATE (no zlib header), in base64url without
+padding. A long link never reaches a server (browsers don't send the part after `#`), but with an
+app's code in it runs to thousands of characters. With Node, from the app's file:
+
+```sh
+node -e '
+const fs = require("fs"), zlib = require("zlib");
+const setup = {
+  output: { kind: "display", device: "waveshare-esp32-c6-lcd-1.47" },
+  board: "waveshare-esp32-c6-lcd-1.47",
+  parts: [{ id: "knob-1", kind: "knob", label: "Speed" }, { id: "button-1", kind: "button", label: "Fire" }],
+  connections: { speed: "knob-1:rotate", fire: "button-1:press" },
+  app: { name: "flame", code: fs.readFileSync("flame.lua", "utf8"), description: "A flame the knob fans" },
+};
+console.log("https://bench.porous.systems/#share=1." + zlib.deflateRawSync(JSON.stringify(setup)).toString("base64url"));
+'
+```
+
+For a short link, which fits anywhere (a LinkedIn post holds 3,000 characters, link included),
+send the data, everything after `#share=`, to Bench, and put the id it answers after `/s/`:
+
+```sh
+curl -s https://bench.porous.systems/api/share --data-binary "1.<data>"   # {"id":"Xk3f9aQ2pL7d"}
+```
+
+Bench keeps only setups it can open, up to 90,000 characters of data, and 30 an hour from one
+address. The id comes from the setup's hash, so the same setup always gets the same link and no one
+can change what a link opens; anyone with the link can open it. The Share button makes short links.
+
+To read a link: for a short one, `curl -s https://bench.porous.systems/api/share/<id>` gives its
+data; then `zlib.inflateRawSync(Buffer.from(data.slice(2), "base64url"))`, where `data` is
+everything after `#share=` (`1.` and the rest).
+
+- `output`: `{ kind: "display", device }` with a `device` from the table below; `{ kind: "strip",
+  count }` with 8, 16, 30, 60 or 144 LEDs; `{ kind: "ring", count }` with 12, 16 or 24;
+  `{ kind: "matrix", w, h }` at 8×8, 16×16 or 32×8.
+- `board`: one that drives that output (below). Modules with their own chip have just the one.
+- `parts`: what the user puts on the bench, `{ id, kind, label }`, with ids `<kind>-<n>` (`knob-1`,
+  `button-2`). Leave out the board's own buttons, IMU and buzzer: they come with the board.
+- `connections`: each of the app's dials and triggers, by the name given to `dial.new` or
+  `trigger.new`, to `"part:channel"` or `"none"`. `{}` leaves it to the app's `connect` and `via`
+  options, as when the app is opened any other way. The board's own parts are `builtin-button-0`
+  (A), `builtin-button-1` (B), `builtin-imu` and `builtin-buzzer`, on boards that have them.
+- `app`: `{ name, code, description? }` for an app you wrote; `{ bundled: "<id>" }` for one of
+  Bench's own (its file name in `src/resident-apps`, less `.lua`).
+
+| Display | `device` | `board` |
+|---|---|---|
+| M5StickC Plus2 | `m5stickc-plus2` | `m5stickc-plus2` |
+| M5StickS3 | `m5sticks3` | `m5sticks3` |
+| Waveshare ESP32-C6-LCD-1.47 | `waveshare-esp32-c6-lcd-1.47` | `waveshare-esp32-c6-lcd-1.47` |
+| Waveshare ESP32-S3-Touch-LCD-2 | `waveshare-esp32-s3-touch-lcd-2` | `waveshare-esp32-s3-touch-lcd-2` |
+| Waveshare ESP32-S3-Touch-AMOLED-1.32 | `waveshare-esp32-s3-touch-amoled-1.32` | `waveshare-esp32-s3-touch-amoled-1.32` |
+| Waveshare ESP32-S3-AMOLED-1.91 | `waveshare-esp32-s3-amoled-1.91` | `waveshare-esp32-s3-amoled-1.91` |
+| Waveshare ESP32-S3-Touch-AMOLED-1.91 | `waveshare-esp32-s3-touch-amoled-1.91` | `waveshare-esp32-s3-amoled-1.91` |
+| 1.3" ST7789 240×240 | `generic-st7789-240x240` | a dev board |
+| SSD1306 OLED 128×64 | `ssd1306-128x64` (yellow/blue: `ssd1306-128x64-yellow-blue`) | a dev board |
+| SSD1306 OLED 128×32 | `ssd1306-128x32` | a dev board |
+| 2.13" e-paper | `waveshare-epd-2.13-v4` | `waveshare-esp32-epaper-driver` or `esp32-s3-devkitc-1-n16r8` |
+
+The dev boards, for bare modules and every LED output: `esp32-s3-devkitc-1-n16r8` (the default),
+`esp32-devkitc` and `seeed-xiao-esp32s3`.
+
+A dial connects to a channel that turns or measures, a trigger to one that fires:
+
+| Part `kind` | Dial channels | Trigger channels |
+|---|---|---|
+| `button` | | `press` |
+| `knob` (rotary encoder) | `rotate` | `push` |
+| `pot` (slide pot) | `position` | |
+| `touch` (touch pad) | | `touch` |
+| `imu` | `tilt-x`, `tilt-y` | `shake` |
+| `ld2410` (radar) | `distance` | `presence` |
+| `pir` | | `motion` |
+| `light` | `level` | `dark` |
+| `climate` | `temperature`, `humidity` | |
+| `buzzer` | | |
+
+Opening a link replaces the setup in that browser, and Bench offers **Back to my bench** until the
+user keeps the new one. An id that Bench doesn't know is left out and named.
+
 ## Lua modules
 
 ### lgfx (preferred)

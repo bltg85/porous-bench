@@ -50,20 +50,23 @@ the bench, and **Connections**, where you decide which part drives each of the a
 heading to fold it away. **About**, top right, says what Bench is and what it's built on. Everything you set up (the output, your parts, the connections, where things
 sit on the desk, folded sections) is saved in this browser and comes back on your next visit.
 
-**Share**, top right, copies a link that opens your setup in anyone's Bench: the output and its
-board, your parts, the connections and the app (a bundled one by name, your own as its code). It
-all travels in the link, after the `#`, which browsers don't send to a server, so nothing is
-stored anywhere. Opening a link replaces the setup in that browser, and **Back to my bench** puts
-theirs back until they choose **Keep this one**. A link with your own app runs to a few thousand
-characters: email, Slack and iMessage carry it whole, but chat apps with a message limit, like
-Discord, cut it off.
+**Share**, top right, copies a short link (`bench.porous.systems/s/…`) that opens your setup in
+anyone's Bench: the output and its board, your parts, the connections and the app (a bundled one by
+name, your own as its code). To keep the link short enough for anywhere (a LinkedIn post holds
+3,000 characters, link included), Bench stores the setup on its server under an id made from the
+setup's own hash: anyone with the link can open it, and no one can change what it opens. If it
+can't be stored (you're offline, or it's a copy of Bench without its server), you get a long link
+instead, which carries the whole setup after the `#` and never reaches a server, but runs to
+thousands of characters with your own app in it. Opening a link replaces the setup in that browser,
+and **Back to my bench** puts theirs back until they choose **Keep this one**.
 
-Everything runs locally in the browser;
-`npm run build` produces a static site you can host anywhere. On Vercel, `vercel.json` adds the
-relay rewrite (below) and the headers: a Content-Security-Policy that lets the page reach only its
-own origin and the relay's WebSocket (add yours to `connect-src` if you use another relay), and
-long caching for the hashed files in `assets/`. bench.porous.systems counts page
-views with Vercel Web Analytics: no cookies, and nothing about your apps or your bench.
+Everything else runs locally in the browser; `npm run build` produces a static site you can host
+anywhere. Short links need the two small functions in `api/` and an Upstash Redis store connected
+to the Vercel project (from the Vercel Marketplace); without them, Share gives long links. On
+Vercel, `vercel.json` adds the relay rewrite (below) and the headers: a Content-Security-Policy
+that lets the page reach only its own origin and the relay's WebSocket (add yours to `connect-src`
+if you use another relay), and long caching for the hashed files in `assets/`. bench.porous.systems
+counts page views with Vercel Web Analytics: no cookies, and nothing about your apps or your bench.
 
 ## What it does
 
@@ -563,6 +566,10 @@ src/sim/            simulator core, framework-free
 src/resident/       Lua runtime: wasmoon host, Resident sandbox prelude, Bench drivers, relay, datetime
 src/resident-apps/  bundled Lua apps (Bench's examples and Resident's)
 src/ui/             React UI; ui/three/ builds the wireframe models from each enclosure
+src/share.ts        share links: making them, opening them, Back to my bench
+  share-format.js     what a link carries and how it's written (shared with api/)
+api/                Vercel functions that keep short links' setups in Upstash Redis; plain
+                    JavaScript, because Vercel's builder can't compile TypeScript 7
 tests/              Vitest: graphics, bus timing, panel physics, LD2410 protocol, Lua sandbox and
                     drivers, every bundled and generated app on every kind of output
 docs/resident/      DEVICE-SKILL.md for Resident's agent skills
@@ -575,7 +582,7 @@ firmware/           Resident firmware for real boards Bench supports (epd213: th
 ## Development
 
 ```sh
-npm run dev        # dev server with hot reload
+npm run dev        # dev server with hot reload (short links kept in memory until it restarts)
 npm test           # unit tests
 npm run typecheck  # TypeScript
 npm run build      # typecheck, tests, then the static build into dist/
