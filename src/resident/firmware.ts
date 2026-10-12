@@ -30,6 +30,11 @@ const BENCH_FIRMWARE: Record<string, { path: string; tested: boolean; note?: str
     tested: true,
     note: 'Its first build downloads and compiles ESP-IDF to rebuild the Arduino core with more RAM for apps (several minutes); `firmware/c6-lcd147/device-prebuilt-core` is the same firmware on the prebuilt core, quicker to build with less memory for apps. If the serial port doesn\'t show up, I hold BOOT while plugging it in.',
   },
+  'waveshare-esp32-s3-touch-lcd-2|waveshare-esp32-s3-touch-lcd-2': {
+    path: 'firmware/s3-lcd2/device',
+    tested: true,
+    note: 'If the serial port doesn\'t show up, I hold BOOT while pressing RST. Keep the board still for the first second after it boots: the IMU measures its gyro drift then.',
+  },
   'waveshare-epd-2.13-v4|esp32-s3-devkitc-1-n16r8': {
     path: 'firmware/epd213/device-s3',
     tested: false,
@@ -49,6 +54,7 @@ const LESSONS = [
   '- Bench sends the time zone its apps run in before each app it mirrors, as `{ channel: "bench", type: "timezone", data: { tz } }`: register `sandbox.onMessageWithChannel("bench", …)` and call `sandbox.setTimezone(tz)`, skipping a zone already applied. A Resident `hello` would set the zone too, but it also makes the board drop un-channelled messages until reboot, which `/resident:push-app` still sends.',
   '- Opening the serial port resets a board with a USB-serial bridge (DTR/RTS); open it with both lines released, or it can stay held in reset.',
   '- A key on a strapping pin (IO12 on the Waveshare e-Paper Driver Board) may have no pull-up of its own: enable `INPUT_PULLUP` after boot.',
+  '- Map an IMU onto Bench\'s frame on the real board: face-up at rest accel ≈ (0, 0, +1) g, the right edge tipped down reads +x and the bottom edge +y, so a ball rolls by (ax, ay). Chips are often mounted turned (the S3-Touch-LCD-2\'s QMI8658 has x and y swapped as well as flipped), and a diagonal tilt can hide a swap: test one edge at a time. Gyros drift a few °/s at rest: average them at boot and subtract.',
   `- When it works, tell me the libraries it has and the app memory you measured, so Bench's board entry (src/sim/boards.ts in ${REPO}) lists the right apps for it.`,
 ];
 
