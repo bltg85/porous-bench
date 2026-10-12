@@ -49,6 +49,15 @@ the hardware: **Output**, where you choose what the app draws on, **Inputs**, wh
 the bench, and **Connections**, where you decide which part drives each of the app's controls. Click a section's
 heading to fold it away. **About**, top right, says what Bench is and what it's built on. Everything you set up (the output, your parts, the connections, where things
 sit on the desk, folded sections) is saved in this browser and comes back on your next visit.
+
+**Share**, top right, copies a link that opens your setup in anyone's Bench: the output and its
+board, your parts, the connections and the app (a bundled one by name, your own as its code). It
+all travels in the link, after the `#`, which browsers don't send to a server, so nothing is
+stored anywhere. Opening a link replaces the setup in that browser, and **Back to my bench** puts
+theirs back until they choose **Keep this one**. A link with your own app runs to a few thousand
+characters: email, Slack and iMessage carry it whole, but chat apps with a message limit, like
+Discord, cut it off.
+
 Everything runs locally in the browser;
 `npm run build` produces a static site you can host anywhere. On Vercel, `vercel.json` adds the
 relay rewrite (below) and the headers: a Content-Security-Policy that lets the page reach only its

@@ -12,10 +12,11 @@ import { onBoard } from './sim/wiring';
 import { SimClock } from './sim/clock';
 import { boardBench, DEFAULT_PARTS, type PartSpec } from './sim/controls/bench';
 import { benchApp } from './sim/generate';
-import { ledProfile, MATRIX_SIZES, type OutputKind, RING_COUNTS, STRIP_COUNTS } from './sim/leds';
-import { devices, findDevice } from './sim/devices';
+import { MATRIX_SIZES, type Output, type OutputKind, RING_COUNTS, STRIP_COUNTS } from './sim/leds';
+import { devices, outputDevice } from './sim/devices';
 import { type LogLine, SketchRun } from './sim/runner';
 import type { InputSpecs, Sketch } from './sim/sketch';
+import { backToMyBench, keepShared, LONG_LINK, type Opened, openedNote, type Setup, shareLink } from './share';
 import { About } from './ui/About';
 import { Console } from './ui/Console';
 import { Copy } from './ui/Copy';
@@ -109,7 +110,8 @@ const bundled: Entry[] = residentApps.map((a) => ({
   needs: a.needs,
 }));
 
-export default function App() {
+/** `shared`: what a share link opened, until you keep it or go back (a string: why a link didn't open). */
+export default function App({ shared = null }: { shared?: Opened | string | null }) {
   const clock = useMemo(() => new SimClock(), []);
   const { paused, speed } = useClockState(clock);
   const [sketchId, setSketchId] = usePersisted('sketch', FIRST_APP);
@@ -157,15 +159,16 @@ export default function App() {
     lastLive.current = live;
   }, [live, setSketchId, setOutputKind]);
 
-  const device = useMemo(() => {
-    if (outputKind === 'strip') return ledProfile({ kind: 'strip', count: stripCount });
-    if (outputKind === 'ring') return ledProfile({ kind: 'ring', count: ringCount });
+  const output = useMemo((): Output => {
+    if (outputKind === 'strip') return { kind: 'strip', count: stripCount };
+    if (outputKind === 'ring') return { kind: 'ring', count: ringCount };
     if (outputKind === 'matrix') {
       const [w, h] = matrixSize.split('x').map(Number);
-      return ledProfile({ kind: 'matrix', w, h });
+      return { kind: 'matrix', w, h };
     }
-    return findDevice(deviceId) ?? devices[0];
+    return { kind: 'display', device: deviceId };
   }, [outputKind, deviceId, stripCount, ringCount, matrixSize]);
+  const device = useMemo(() => outputDevice(output) ?? devices[0], [output]);
 
   // The board driving the output decides the libraries and memory an app gets.
   const boards = boardsFor(device);
@@ -209,6 +212,8 @@ export default function App() {
   useEffect(() => {
     if (sketchId !== FIRST_APP) setNotice(null);
   }, [sketchId]);
+  // What a share link opened: said on every load until you go back to your bench or keep this one.
+  const [shareNote, setShareNote] = useState(shared);
 
   const [run, setRun] = useState<SketchRun | null>(null);
   // A board with other drawing libraries restarts the app, as flashing that board would.
@@ -259,6 +264,15 @@ export default function App() {
   useEffect(() => {
     if (run && remote.active) void remote.start({ name: entry.name.replace(/^▶ /, ''), code: entry.code }, mirrorSource, { display: { id: device.id, name: device.name }, tz: session.zone.name });
   }, [run, mirrorSource]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // What a share link carries: this output and board, your parts, the app's connections, and the app.
+  const shareSetup = (): Setup => ({
+    output,
+    board: board.id,
+    parts: bench.specs(),
+    connections: Object.fromEntries((run?.controls ?? []).map((c) => [c.name, c.source])),
+    app: entry.id === 'resident:live' && live ? { name: live.name, code: live.code, description: live.description } : { bundled: entry.id.replace(/^resident:/, '') },
+  });
 
   const byTech = (['lcd', 'amoled', 'oled', 'epaper'] as const).map((tech) => ({ tech, list: devices.filter((d) => d.tech === tech) }));
 
@@ -324,6 +338,13 @@ export default function App() {
             ⟳ {view.rotation === 'auto' ? 'Auto' : `${view.rotation * 90}°`}
           </button>
           <span className="toolbar-gap" />
+          <Copy
+            className=""
+            label="Share"
+            done={(link) => (link.length > LONG_LINK ? 'Long link copied' : 'Link copied')}
+            title={`Copy a link that opens this setup in anyone's Bench: the output and board, your parts, the connections and the app (your own goes in as its code). A link over ${LONG_LINK.toLocaleString('en')} characters is too long for chat apps with a message limit, like Discord; email, Slack and iMessage take it whole.`}
+            text={() => shareLink(shareSetup(), location.origin + location.pathname)}
+          />
           <About />
         </div>
       </header>
@@ -413,8 +434,18 @@ export default function App() {
             error={error}
             onDropApp={(name, code) => session.setLive({ name: name.replace(/\.lua$/, ''), code, source: 'file' })}
             onViewFailed={() => setView((v) => ({ ...v, mode: 'flat' }))}
-            notice={notice}
-            onDismiss={() => setNotice(null)}
+            notice={
+              shareNote && typeof shareNote === 'object'
+                ? {
+                    text: openedNote(shareNote),
+                    actions: [
+                      { label: 'Back to my bench', run: backToMyBench },
+                      { label: 'Keep this one', run: () => (keepShared(), setShareNote(null)) },
+                    ],
+                  }
+                : (shareNote ?? notice)
+            }
+            onDismiss={() => (shareNote ? setShareNote(null) : setNotice(null))}
           />
         )}
         {/* Right: the hardware — controls, the display, and the parts on the desk. */}

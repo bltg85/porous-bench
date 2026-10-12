@@ -458,6 +458,12 @@ details.raw p.hex {
   text-transform: none;
   letter-spacing: normal;
 }
+.stage-note-actions {
+  display: inline-flex;
+  gap: 12px;
+  margin-left: 12px;
+  white-space: nowrap;
+}
 
 /* The whole page, when the app failed to render (ui/ErrorBoundary.tsx). */
 .crashed {

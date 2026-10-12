@@ -8,7 +8,8 @@ import { Zone } from './zone';
 
 export interface LiveApp extends IncomingApp {
   name: string;
-  source: 'relay' | 'editor' | 'file';
+  /** Where it came from: pushed over the relay, written in the editor, a dropped .lua file, or a share link. */
+  source: 'relay' | 'editor' | 'file' | 'link';
 }
 
 type Level = 'info' | 'warn' | 'error';

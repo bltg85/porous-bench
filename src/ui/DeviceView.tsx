@@ -31,8 +31,8 @@ interface Props {
   onDropApp?(name: string, code: string): void;
   /** The 3D or Wiring view failed (no WebGL, its code didn't load, it threw): switch to flat. */
   onViewFailed?(): void;
-  /** A note from Bench over the stage, until it's dismissed. */
-  notice?: string | null;
+  /** A note from Bench over the stage, until it's dismissed (a string: click it) or one of its actions is taken. */
+  notice?: string | { text: string; actions: { label: string; run(): void }[] } | null;
   onDismiss?(): void;
 }
 
@@ -199,7 +199,18 @@ export function DeviceView({ run, clock, board, view, error, onDropApp, onViewFa
             {...touchHandlers}
           />
         )}
-        {notice ? (
+        {notice && typeof notice === 'object' ? (
+          <div className="stage-note">
+            {notice.text}
+            <span className="stage-note-actions">
+              {notice.actions.map((a) => (
+                <button key={a.label} className="link" onClick={a.run}>
+                  {a.label}
+                </button>
+              ))}
+            </span>
+          </div>
+        ) : notice ? (
           <button className="stage-note" onClick={onDismiss} title="Dismiss">
             {notice}
           </button>

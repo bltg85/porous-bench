@@ -1,3 +1,4 @@
+import { ledProfile, type Output } from '../leds';
 import type { DeviceProfile } from './types';
 
 // Every other .ts file in this folder is a device: drop a new file in to add one.
@@ -9,6 +10,11 @@ export const devices: DeviceProfile[] = Object.values(modules)
 
 export function findDevice(id: string): DeviceProfile | undefined {
   return devices.find((d) => d.id === id);
+}
+
+/** The profile for an output: a display by its id (undefined if there's no such display), or an LED chain built to its size. */
+export function outputDevice(o: Output): DeviceProfile | undefined {
+  return o.kind === 'display' ? findDevice(o.device) : ledProfile(o);
 }
 
 function techOrder(d: DeviceProfile) {
