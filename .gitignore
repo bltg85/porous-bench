@@ -26,3 +26,6 @@ firmware/**/dependencies.lock
 
 # Your own apps: their own repo (npm run my-apps sets it up)
 /my-apps/
+
+# The native app: its own private repo
+/apple/

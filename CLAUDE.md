@@ -19,6 +19,8 @@ apps; it can also mirror an app onto a real Resident board. Live at https://benc
   JavaScript checked through JSDoc: Vercel's builder can't compile TypeScript 7.
 - `firmware/`: Resident firmware Bench ships for real boards (PlatformIO; Resident pinned by commit).
 - `my-apps/`: the user's own apps. Ignored by this repo and its own git repo (`npm run my-apps`).
+- `apple/`: the native app (macOS, iPhone, iPad). Ignored by this repo and its own private git repo; when
+  it's there, read its `CLAUDE.md` before changing the Resident runtime, the display pipeline or `remote.lua`.
 
 ## Commands
 
