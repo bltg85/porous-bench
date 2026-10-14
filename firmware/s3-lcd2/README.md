@@ -106,6 +106,36 @@ What it taught:
 - **Doubles are software on the S3** (its FPU is single precision), as on the C6: blend colours in
   integers, build tables once, precompute per-object constants.
 
+## Home Assistant (optional)
+
+With `device/src/HomeAssistantConfig.h` (gitignored; copy `HomeAssistantConfig.example.h`), every
+`events.send` also goes as an HTTP POST to a Home Assistant webhook on the LAN, so an app can
+switch lights with nothing in the cloud listening: the relay takes the board's events but passes
+them to no one. The body is the event as the relay gets it (`{"channel":"app","type":"lamp",
+"data":{"on":false,...},"from":"b4df8785",...}`), read in an automation as `trigger.json`. Use the
+Pi's IP address (the board doesn't resolve `.local`), and keep the webhook ID out of git: it is the
+only thing guarding the hook. The POST runs on its own task, so a slow or absent Home Assistant
+never stalls the app. Without the file the firmware is unchanged.
+
+An automation for La Linea (`my-apps/la-linea.lua`, which sends `lamp` `{on, level}`):
+
+```yaml
+alias: La Linea switches the room
+triggers:
+  - trigger: webhook
+    webhook_id: <the ID in HomeAssistantConfig.h>
+    allowed_methods: [POST]
+    local_only: true
+conditions:
+  - condition: template
+    value_template: "{{ trigger.json.type == 'lamp' }}"
+actions:
+  - action: "light.turn_{{ 'on' if trigger.json.data.on else 'off' }}"
+    target:
+      area_id: <the room's area ID>
+mode: queued
+```
+
 ## Check apps (device/device-apps/)
 
 - `driver-check.lua`: accel, gyro, temperature, touch and its events, BOOT taps and holds, the

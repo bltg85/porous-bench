@@ -23,6 +23,8 @@ firmware/**/.dummy/
 firmware/**/sdkconfig.*
 firmware/**/sdkconfig.defaults
 firmware/**/dependencies.lock
+# A board's Home Assistant webhook (its ID is the only thing guarding it)
+firmware/**/HomeAssistantConfig.h
 
 # Your own apps: their own repo (npm run my-apps sets it up)
 /my-apps/

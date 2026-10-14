@@ -18,6 +18,7 @@
 #include "ImuDriver.h"
 #include "LvglTimerReaper.h"
 #include "AppStore.h"
+#include "HomeAssistant.h"
 
 static constexpr const char* RESIDENT_HOST = "resident.inanimate.tech";
 static constexpr uint16_t RESIDENT_PORT = 443;
@@ -118,6 +119,23 @@ void setup() {
     applied = tz;
     sandbox.setTimezone(tz.c_str());
   });
+
+  // With a Home Assistant webhook set (HomeAssistant.h), each app event goes to
+  // it as well as to the relay. Resident retries an event the relay didn't
+  // take, so the copy is sent once, by its seq. While the relay is down the
+  // queue waits behind its first event, and so do the copies after it.
+  if (HomeAssistant::enabled()) {
+    HomeAssistant::begin();
+    sandbox.setEventSink([](JsonDocument& doc) {
+      static uint32_t forwarded = 0;
+      uint32_t seq = doc["seq"] | 0;
+      if (seq != forwarded) {
+        forwarded = seq;
+        HomeAssistant::post(doc);
+      }
+      return sandbox.isConnected() && sandbox.courier().send(doc);
+    });
+  }
 
   appStore.begin();  // Resident doesn't start a store the board supplies
   sandbox.setup();
