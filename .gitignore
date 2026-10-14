@@ -29,3 +29,8 @@ firmware/**/dependencies.lock
 
 # The native app: its own private repo
 /apple/
+
+# Local agent tooling: installed skills and their lock file
+/.agents/
+/.claude/
+/skills-lock.json
