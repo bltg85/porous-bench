@@ -241,6 +241,10 @@ export function Device3D({ run, clock, board, mount, onCanvas }: Props) {
       // A new stage shape may suit another automatic layout; re-flow, and keep things fitted.
       if (!moving) laidOutFor = -1;
       if (!orbit.manual) fitAfterLayout = 'instant';
+      // Resizing the canvas clears it, and a ResizeObserver runs after this frame's
+      // requestAnimationFrame but before the paint: draw now, or the stage shows one empty frame
+      // (a flash, e.g. going full screen).
+      paint();
     };
 
     /**
@@ -723,6 +727,9 @@ export function Device3D({ run, clock, board, mount, onCanvas }: Props) {
     let first = true;
     const frame = () => {
       raf = requestAnimationFrame(frame);
+      paint();
+    };
+    const paint = () => {
       try {
         draw();
       } catch (e) {
