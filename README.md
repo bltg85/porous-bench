@@ -468,7 +468,9 @@ M5StickC Plus2 or M5StickS3 that's Resident's own `m5stick-demo` firmware. For t
 the Waveshare ESP32 e-Paper Driver Board (or an ESP32-S3 DevKitC-1 N16R8) it's the firmware in
 [`firmware/epd213/`](firmware/epd213/), built and tested on the driver board; the S3 build compiles
 but hasn't run on hardware yet. For the Waveshare ESP32-C6-LCD-1.47 it's
-[`firmware/c6-lcd147/`](firmware/c6-lcd147/), tested on the board. For other boards it follows Resident's
+[`firmware/c6-lcd147/`](firmware/c6-lcd147/), tested on the board. For the Guition ESP32-S3-4848S040
+it's [`firmware/guition-4848s040/`](firmware/guition-4848s040/), which compiles but hasn't run on
+hardware yet. For other boards it follows Resident's
 [start-building guide](https://github.com/inanimate-tech/resident/blob/main/docs/start-building.md)
 in stages (bring-up, then Resident, then drivers), using the pins, offsets and quirks Bench knows
 for the part and the platform it needs (pioarduino for the ESP32-C6), plus what bringing up the
@@ -582,7 +584,9 @@ docs/resident/      DEVICE-SKILL.md for Resident's agent skills
 my-apps/            your own apps, ignored by this repo (npm run my-apps makes it its own repo)
 scripts/            my-apps.mjs (sets up my-apps/), logo-app.mjs (the logo SVG into its app)
 firmware/           Resident firmware for real boards Bench supports (epd213: the 2.13" e-paper;
-                    c6-lcd147: the Waveshare ESP32-C6-LCD-1.47)
+                    c6-lcd147: the Waveshare ESP32-C6-LCD-1.47; s3-lcd2: the ESP32-S3-Touch-LCD-2;
+                    xiao-round: Seeed's Round Display for XIAO; guition-4848s040: the Guition
+                    ESP32-S3-4848S040, not run on hardware yet)
 ```
 
 ## Development

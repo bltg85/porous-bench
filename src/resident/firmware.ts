@@ -40,6 +40,11 @@ const BENCH_FIRMWARE: Record<string, { path: string; tested: boolean; note?: str
     tested: true,
     note: 'Check with me that the display\'s power switch (on its rim) is on: it cuts the display\'s power even on USB, and the screen stays dark. If the serial port doesn\'t show up, I hold B (BOOT) on the XIAO while pressing R.',
   },
+  'guition-esp32-s3-4848s040|guition-esp32-s3-4848s040': {
+    path: 'firmware/guition-4848s040/device',
+    tested: false,
+    note: 'It compiles but hasn\'t run on hardware yet. Its USB-C goes through a CH340, so the port is `/dev/cu.usbserial-…` or `/dev/cu.wchusbserial-…`; BOOT and RST sit inside the case. Check with me that the status screen fills the glass the right way up, then that the picture stays put after the first app is pushed (saving it writes flash). If anything looks wrong, flash stage 1 (`firmware/guition-4848s040/device-no-resident`) and go through its test card with me, as the README says.',
+  },
   'waveshare-epd-2.13-v4|esp32-s3-devkitc-1-n16r8': {
     path: 'firmware/epd213/device-s3',
     tested: false,
