@@ -5,8 +5,8 @@ function maxFps(d: DeviceProfile): number {
   const n = d.width * d.height;
   if (d.tech === 'led') return 1000 / (((n * 24) / d.bus.hz) * 1000 + 0.3);
   const bytes = d.tech === 'lcd' || d.tech === 'amoled' ? n * 2 : n / 8;
-  const bits = d.bus.kind === 'i2c' ? bytes * 9 * 1.06 : d.bus.kind === 'qspi' ? bytes * 2 : bytes * 8;
-  return d.bus.hz / bits;
+  const clocks = d.bus.kind === 'i2c' ? bytes * 9 * 1.06 : d.bus.kind === 'qspi' ? bytes * 2 : d.bus.kind === 'rgb' ? bytes / 2 : bytes * 8;
+  return d.bus.hz / clocks;
 }
 
 /** A line of the spec table: its name, its value, and optionally more on hover. */
@@ -22,7 +22,7 @@ export function DeviceInfo({ device, facts = [], children }: { device: DevicePro
   const bus =
     device.bus.kind === 'ws2812'
       ? `one wire @ ${device.bus.hz / 1e3} kHz`
-      : device.bus.kind === 'spi' || device.bus.kind === 'qspi'
+      : device.bus.kind !== 'i2c'
         ? `${device.bus.kind.toUpperCase()} @ ${device.bus.hz / 1e6} MHz`
         : `I2C @ ${device.bus.hz / 1e3} kHz · 0x${(device.bus.i2cAddress ?? 0x3c).toString(16)}`;
   const leds = device.look.leds;

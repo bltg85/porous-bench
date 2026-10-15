@@ -382,6 +382,20 @@ export const PINOUTS: Record<string, Pinout> = {
     notes: ['The header shares its pins with the camera connector: with a camera fitted, only GPIO 18 is free for parts.'],
     source: 'Waveshare ESP32-S3-Touch-LCD-2 pinout and schematic',
   },
+  'guition-esp32-s3-4848s040': {
+    // Header H1 on the back (2×4): GPIO40, 2 and 1, the rest UART0, 5V and GND. The RGB panel,
+    // its init bus, the backlight, the touch panel's I2C (19, 45), the TF card and PSRAM take every
+    // other pin. The touch bus doesn't reach a header, so sensors get a second I2C bus on H1.
+    pins: pins([40, { gpio: 2, adc: 1, touch: 2 }, { gpio: 1, adc: 0, touch: 1 }]),
+    i2c: { sda: 2, scl: 1 },
+    fiveVolt: '5V',
+    notes: [
+      'Only three GPIOs reach a header: 40, 2 and 1 on H1, behind the panel. The relay versions switch their relays on them (one relay: only 40), and the speaker amp takes them over if its links are moved.',
+      'An I2C sensor goes on H1 (SDA 2, SCL 1) as a second bus: the touch panel\'s bus (19, 45) stays inside.',
+      'Power it from H1\'s 5V or the USB-C, never both at once.',
+    ],
+    source: 'ESPHome device config for the Guition-ESP32-S3-4848S040 and its photo of the board\'s connectors',
+  },
   'waveshare-esp32-s3-touch-amoled-1.32': {
     // The SH1.0 12-pin connector: GP1, GP2 and the board's own I2C bus (touch, codec). GP0 is BOOT.
     pins: pins([{ gpio: 1, adc: 0, touch: 1 }, { gpio: 2, adc: 1, touch: 2 }, 47, 48]),

@@ -182,9 +182,9 @@ export class Display extends Gfx {
     // WS2812: 1.25 µs a bit, then a ≥280 µs low to latch.
     if (kind === 'ws2812') return ((bytes * 8) / hz) * 1000 + 0.3;
     // I2C: 9 clocks per byte plus address+control bytes for every ~32-byte chunk.
-    // QSPI: four data lines, four bits a clock.
-    const bits = kind === 'i2c' ? bytes * 9 + Math.ceil(bytes / 32) * 18 : kind === 'qspi' ? bytes * 2 : bytes * 8;
-    return (bits / hz) * 1000;
+    // QSPI: four data lines, four bits a clock. RGB: a 16-bit pixel a clock, as the panel scans.
+    const clocks = kind === 'i2c' ? bytes * 9 + Math.ceil(bytes / 32) * 18 : kind === 'qspi' ? bytes * 2 : kind === 'rgb' ? bytes / 2 : bytes * 8;
+    return (clocks / hz) * 1000;
   }
 }
 

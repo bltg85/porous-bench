@@ -146,7 +146,7 @@ export function DeviceView({ run, clock, board, view, error, onDropApp, onViewFa
   };
 
   const busLabel =
-    device.bus.kind === 'ws2812' ? `WS2812 ${device.bus.hz / 1e3} kHz` : device.bus.kind === 'spi' || device.bus.kind === 'qspi' ? `${device.bus.kind.toUpperCase()} ${device.bus.hz / 1e6} MHz` : `I2C ${device.bus.hz / 1e3} kHz`;
+    device.bus.kind === 'ws2812' ? `WS2812 ${device.bus.hz / 1e3} kHz` : device.bus.kind !== 'i2c' ? `${device.bus.kind.toUpperCase()} ${device.bus.hz / 1e6} MHz` : `I2C ${device.bus.hz / 1e3} kHz`;
 
   return (
     <section className="stage-wrap">

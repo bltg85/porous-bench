@@ -157,6 +157,7 @@ describe('wiring', () => {
       m5sticks3: [0, 3, 19, 20, 43, 44],
       'waveshare-esp32-s3-touch-lcd-2': [0, 3, 19, 20, 43, 44, 45, 46],
       'waveshare-esp32-s3-touch-amoled-1.32': [0, 19, 20, 43, 44],
+      'guition-esp32-s3-4848s040': [0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 35, 36, 37, 38, 39, 41, 42, 43, 44, 45, 46, 47, 48],
       'waveshare-esp32-s3-amoled-1.91': [0, 1, 3, 16, 17, 19, 20, 26, 33, 34, 35, 36, 37, 43, 44],
     };
     for (const [id, p] of Object.entries(PINOUTS)) {
